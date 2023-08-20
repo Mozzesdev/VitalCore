@@ -1,0 +1,14 @@
+name: CoreWild
+main: me.winflix.vitalcore.VitalCore
+version: ${project.version}
+api-version: 1.19
+authors: [WinFlix]
+description: Core of OverWild
+commands:
+  tribe:
+    description: Main command of the tribes
+    usage: /<command>
+    aliases:
+      - clan
+      - team
+      - tr

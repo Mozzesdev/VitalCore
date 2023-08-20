@@ -1,0 +1,8 @@
+inviteTitle: "#F04747Has Recibido una Invitacion!"
+inviteMessage: "Has recibido una invitacion de la tribu de {sender}! (Decide con 's' o 'n' para confirmar)"
+acceptPrompt: "s"
+rejectPrompt: "n"
+acceptedMessageSender: "{receiver} ha aceptado la invitacion a la tribu."
+rejectedMessageSender: "{receiver} ha rechazado la invitacion a la tribu."
+acceptedMessageReceiver: "Has aceptado la invitacion a la tribu de {sender}."
+rejectedMessageReceiver: "Has rechazado la invitacion a la tribu de {sender}."
