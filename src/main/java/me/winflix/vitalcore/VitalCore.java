@@ -12,8 +12,9 @@ import me.winflix.vitalcore.commands.CommandManager;
 import me.winflix.vitalcore.commands.SubCommand;
 import me.winflix.vitalcore.commands.tribe.home.SetTribeHome;
 import me.winflix.vitalcore.commands.tribe.home.ToTribeHome;
-import me.winflix.vitalcore.commands.tribe.invites.Invite;
-import me.winflix.vitalcore.commands.tribe.invites.Leave;
+import me.winflix.vitalcore.commands.tribe.members.Invite;
+import me.winflix.vitalcore.commands.tribe.members.Kick;
+import me.winflix.vitalcore.commands.tribe.members.Leave;
 import me.winflix.vitalcore.commands.tribe.menus.Members;
 import me.winflix.vitalcore.commands.tribe.menus.Menu;
 import me.winflix.vitalcore.database.Database;
@@ -26,10 +27,10 @@ import me.winflix.vitalcore.utils.Utils;
 import me.winflix.vitalcore.utils.YmlFileManager;
 
 public class VitalCore extends JavaPlugin {
-  public static final Logger Log = Logger.getLogger("CoreWild");
+  public static final Logger Log = Logger.getLogger("VitalCore");
   private static VitalCore plugin;
   private ArrayList<SubCommand> tribeCommands = new ArrayList<SubCommand>();
-  public static final String prefix = Utils.useColors("&7[&cCoreWild&7] ");
+  public static final String prefix = Utils.useColors("&7[&cVitalCore&7] ");
   private static YmlFileManager messagesConfigManager;
   private static ConfigFile configManager;
 
@@ -111,6 +112,7 @@ public class VitalCore extends JavaPlugin {
     tribeCommands.add(new SetTribeHome());
     tribeCommands.add(new ToTribeHome());
     tribeCommands.add(new Invite(this));
+    tribeCommands.add(new Kick());
     tribeCommands.add(new Members());
     tribeCommands.add(new Leave());
   }

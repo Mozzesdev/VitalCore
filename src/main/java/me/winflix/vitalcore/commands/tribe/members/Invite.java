@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.commands.tribe.invites;
+package me.winflix.vitalcore.commands.tribe.members;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,10 @@ import me.winflix.vitalcore.events.ConfirmationConversation;
 import me.winflix.vitalcore.interfaces.ConfirmationHandler;
 import me.winflix.vitalcore.menu.ConfirmMenu;
 import me.winflix.vitalcore.models.PlayerModel;
+import me.winflix.vitalcore.models.PlayerRank;
 import me.winflix.vitalcore.models.TribeMember;
 import me.winflix.vitalcore.models.TribeModel;
+import me.winflix.vitalcore.utils.RankManager;
 import me.winflix.vitalcore.utils.Utils;
 
 public class Invite extends SubCommand {
@@ -62,10 +64,17 @@ public class Invite extends SubCommand {
         TribeModel senderTribe = senderPlayer.getTribe();
 
         if (!senderTribe.isOpen()) {
-            p.sendMessage(Utils.useColors("&cLa tribu actualmente esta cerrada a nuevos miembros."));
+            Utils.logMessage(p, "&cLa tribu actualmente esta cerrada a nuevos miembros.");
             return;
         }
-        
+
+        PlayerRank senderRank = senderTribe.getMember(p.getUniqueId()).getRange();
+
+        if (!senderRank.isCanInvite()) {
+            Utils.logMessage(p, "&cNo tienes permitido invitar a nuevos miembros.");
+            return;
+        }
+
         List<String> onlinePlayers = new ArrayList<>();
         List<String> offlinePlayers = new ArrayList<>();
 
@@ -112,22 +121,23 @@ public class Invite extends SubCommand {
 
                         if (recieverMember != null) {
                             if (recieverTribe.getMembers().size() > 1) {
-                                if (!recieverMember.getRange().equalsIgnoreCase("Owner")) {
-                                    recieverTribe.removeMember(recieverMember);
-                                    TribeCollection.saveTribe(recieverTribe);
-                                } else {
-                                    recieverTribe.removeMember(recieverMember);
+                                if (recieverMember.getRange().isCanInvite()) {
                                     TribeMember newOwner = recieverTribe.getDiferentMember(r.getUniqueId());
-                                    newOwner.setRange("Owner");
+                                    newOwner.setRange(RankManager.OWNER_RANK);
                                     recieverTribe.replaceMember(UUID.fromString(newOwner.getId()), newOwner);
                                     TribeCollection.saveTribe(recieverTribe);
                                 }
+                                recieverTribe.removeMember(recieverMember);
                             } else {
                                 TribeCollection.deleteTribe(recieverTribe);
                             }
-                            recieverMember.setRange("Member");
+                            recieverMember.setRange(RankManager.MEMBER_RANK);
                             senderTribe.addMember(recieverMember);
                             TribeCollection.saveTribe(senderTribe);
+
+                            recieverPlayer.setTribeId(senderTribe.getId());
+                            UserCollection.savePlayer(recieverPlayer);
+
                             Utils.logMessage(r,
                                     "&cTe has unido a la tribu de &6"
                                             + senderTribe.getTribeName().replaceAll("-", " "));

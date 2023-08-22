@@ -27,7 +27,7 @@ public class MembersMenu extends PaginatedMenu {
         super(playerMenuUtility);
         UUID inventoryOwnerId = playerMenuUtility.getOwner().getUniqueId();
         PlayerModel player = UserCollection.getPlayerWithTribe(inventoryOwnerId);
-        TribeModel tribeOfOwner = player.getTribe(); 
+        TribeModel tribeOfOwner = player.getTribe();
         membersDB = tribeOfOwner.getMembers();
         tribeSize = membersDB.size();
     }
@@ -54,7 +54,7 @@ public class MembersMenu extends PaginatedMenu {
                         ((SkullMeta) clickedItem.getItemMeta()).getOwningPlayer() != null &&
                         ((SkullMeta) clickedItem.getItemMeta()).getOwningPlayer().getUniqueId().equals(memberUUID)) {
 
-                    e.getWhoClicked().sendMessage(member.getRange());
+                    e.getWhoClicked().sendMessage(member.getRange().toString());
                     break;
                 }
             }
@@ -71,7 +71,7 @@ public class MembersMenu extends PaginatedMenu {
 
                 List<String> memberLore = new ArrayList<>();
                 memberLore.add(Utils.useColors("&7Name: &a" + member.getPlayerName()));
-                memberLore.add(Utils.useColors("&7Range: &a" + member.getRange()));
+                memberLore.add(Utils.useColors("&7Range: &a" + member.getRange().getDisplayName()));
 
                 ItemStack playerSkull = PlayerUtils.getPlayerSkull(member.getPlayerName(),
                         UUID.fromString(member.getId()), memberLore.toArray(new String[0]));

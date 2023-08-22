@@ -15,6 +15,7 @@ import com.mongodb.client.model.Filters;
 
 import me.winflix.vitalcore.models.TribeMember;
 import me.winflix.vitalcore.models.TribeModel;
+import me.winflix.vitalcore.utils.RankManager;
 
 public class TribeCollection {
 
@@ -32,7 +33,7 @@ public class TribeCollection {
     public static TribeModel createTribe(Player player) {
         TribeMember owner = new TribeMember(player.getDisplayName(), player.getUniqueId().toString());
         String tribeName = "Tribe_of_" + owner.getPlayerName();
-        owner.setRange("Owner");
+        owner.setRange(RankManager.OWNER_RANK);
         TribeModel tribeModel = new TribeModel(tribeName, UUID.randomUUID().toString());
         tribeModel.addMember(owner);
         tribesCollection.insertOne(tribeModel);

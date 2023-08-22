@@ -3,7 +3,7 @@ package me.winflix.vitalcore.models;
 public class TribeMember {
     String playerName;
     String id;
-    String range;
+    PlayerRank range;
 
     public TribeMember() {
     }
@@ -29,11 +29,11 @@ public class TribeMember {
         this.id = id;
     }
 
-    public String getRange() {
-        return this.range;
+    public PlayerRank getRange() {
+        return range;
     }
 
-    public void setRange(final String range) {
+    public void setRange(final PlayerRank range) {
         this.range = range;
     }
 
