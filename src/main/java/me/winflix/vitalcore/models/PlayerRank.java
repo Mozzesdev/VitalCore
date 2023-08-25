@@ -1,7 +1,6 @@
 package me.winflix.vitalcore.models;
 
 import me.winflix.vitalcore.utils.RankManager;
-import me.winflix.vitalcore.utils.Utils;
 
 public class PlayerRank {
     String name;
@@ -29,7 +28,7 @@ public class PlayerRank {
     }
 
     public String getDisplayName() {
-        return Utils.useColors(displayName);
+        return displayName;
     }
 
     public void setDisplayName(final String displayName) {

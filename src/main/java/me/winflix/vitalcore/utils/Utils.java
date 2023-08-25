@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.models.TribeMember;
 import me.winflix.vitalcore.models.TribeModel;
 import net.md_5.bungee.api.ChatColor;
@@ -20,6 +19,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 
 public class Utils {
+    public static String ERROR_PREFIX = "";
+    public static String SUCCESS_PREFIX = "";
+    public static String INFO_PREFIX = "";
 
     public static String useColors(String value) {
         Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
@@ -34,8 +36,16 @@ public class Utils {
         return ChatColor.translateAlternateColorCodes('&', value);
     }
 
-    public static void logMessage(Player p, String message) {
-        p.sendMessage(useColors(VitalCore.prefix + message));
+    public static void infoMessage(Player p, String message) {
+        p.sendMessage(useColors(INFO_PREFIX + message));
+    }
+
+    public static void errorMessage(Player p, String message) {
+        p.sendMessage(useColors(ERROR_PREFIX + message));
+    }
+
+    public static void successMessage(Player p, String message) {
+        p.sendMessage(useColors(SUCCESS_PREFIX + message));
     }
 
     public static void sendClickableCommand(Player player, ClickableMessage... message) {
@@ -65,7 +75,7 @@ public class Utils {
         for (TribeMember member : membersTribe) {
             Player memberPlayer = Bukkit.getPlayer(UUID.fromString(member.getId()));
             if (memberPlayer.isOnline()) {
-                memberPlayer.sendMessage(Utils.useColors(message));
+                Utils.infoMessage(memberPlayer, message);
             }
         }
     }

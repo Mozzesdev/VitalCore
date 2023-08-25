@@ -1,5 +1,7 @@
 package me.winflix.vitalcore.commands.tribe.members;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
@@ -8,6 +10,7 @@ import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.commands.SubCommand;
 import me.winflix.vitalcore.database.collections.TribeCollection;
 import me.winflix.vitalcore.database.collections.UserCollection;
+import me.winflix.vitalcore.interfaces.ConfirmMessages;
 import me.winflix.vitalcore.menu.ConfirmMenu;
 import me.winflix.vitalcore.models.PlayerModel;
 import me.winflix.vitalcore.models.TribeMember;
@@ -43,22 +46,37 @@ public class Leave extends SubCommand {
     }
 
     @Override
+    public List<String> getSubCommandArguments(Player player, String[] args) {
+        return null;
+    }
+
+    @Override
     public void perform(Player p, String[] args) {
         PlayerModel playerDB = UserCollection.getPlayerWithTribe(p.getUniqueId());
         TribeModel tribeDB = playerDB.getTribe();
 
         if (tribeDB.getMembers().size() <= 1) {
-            p.sendMessage(Utils.useColors("&cNo puedes salirte de tu tribu si solo estas tu."));
+            Utils.errorMessage(p, "No puedes salirte de tu tribu si solo estas tu.");
             return;
         }
 
+        String confirmMessage = "&aInvitar a";
+        List<String> confirmLore = new ArrayList<String>();
+        confirmLore.add("&7Click para invitar a");
+        String cancelMessage = "&cCancelar invitacion";
+        List<String> cancelLore = new ArrayList<String>();
+        cancelLore.add("&7Click para cancelar la invitacion!");
+
+        ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage, confirmLore, cancelMessage,
+                cancelLore);
+
         ConfirmMenu confirmMenu = new ConfirmMenu(VitalCore.getPlayerMenuUtility(p),
-                VitalCore.getMessagesConfigManager().getConfig());
+                VitalCore.fileManager.getMessagesFile().getConfig(), confirmMessages, "");
         confirmMenu.afterClose((condition) -> {
             if (condition) {
                 TribeMember member = tribeDB.getMember(p.getUniqueId());
 
-                if (member.getRange() == RankManager.OWNER_RANK) {
+                if (member.getRange().getName().equals(RankManager.OWNER_RANK.getName())) {
                     TribeMember newOwner = tribeDB.getDiferentMember(p.getUniqueId());
                     newOwner.setRange(RankManager.OWNER_RANK);
                     tribeDB.replaceMember(UUID.fromString(newOwner.getId()), newOwner);
@@ -69,9 +87,10 @@ public class Leave extends SubCommand {
 
                 TribeModel t = TribeCollection.createTribe(p);
                 playerDB.setTribeId(t.getId());
+                playerDB.setTribe(null);
                 UserCollection.savePlayer(playerDB);
 
-                p.sendMessage(Utils.useColors("&bHas salido correctamente de tu tribu y se creo tu nueva tribu"));
+                Utils.successMessage(p, "Has salido correctamente de tu tribu y se creo tu nueva tribu.");
             }
         });
 

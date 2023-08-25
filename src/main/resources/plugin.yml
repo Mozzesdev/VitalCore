@@ -1,4 +1,4 @@
-name: CoreWild
+name: VitalCore
 main: me.winflix.vitalcore.VitalCore
 version: ${project.version}
 api-version: 1.19
@@ -12,3 +12,9 @@ commands:
       - clan
       - team
       - tr
+  vcore:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - vitalcore
+      - vr

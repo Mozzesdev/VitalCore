@@ -1,5 +1,8 @@
 package me.winflix.vitalcore.commands.tribe.members;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -7,6 +10,7 @@ import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.commands.SubCommand;
 import me.winflix.vitalcore.database.collections.TribeCollection;
 import me.winflix.vitalcore.database.collections.UserCollection;
+import me.winflix.vitalcore.interfaces.ConfirmMessages;
 import me.winflix.vitalcore.menu.ConfirmMenu;
 import me.winflix.vitalcore.models.PlayerModel;
 import me.winflix.vitalcore.models.PlayerRank;
@@ -42,17 +46,22 @@ public class Kick extends SubCommand {
     }
 
     @Override
+    public List<String> getSubCommandArguments(Player player, String[] args) {
+        return null;
+    }
+
+    @Override
     public void perform(Player sender, String[] args) {
 
         if (args.length <= 1) {
-            Utils.logMessage(sender, "&cSyntax error: use " + getSyntax());
+            Utils.errorMessage(sender, "Syntax error: use " + getSyntax());
             return;
         }
 
         Player targetPlayer = Bukkit.getPlayer(args[1]);
 
         if (targetPlayer.getDisplayName().equalsIgnoreCase(sender.getDisplayName())) {
-            Utils.logMessage(sender, "&cNo puedes expulsarte a ti mismo, intenta con /tribe leave.");
+            Utils.errorMessage(sender, "No puedes expulsarte a ti mismo, intenta con /tribe leave.");
             return;
         }
 
@@ -63,13 +72,23 @@ public class Kick extends SubCommand {
         TribeMember member = tribeDB.getMember(targetPlayer.getUniqueId());
 
         if (!senderRange.canKick(member)) {
-            Utils.logMessage(sender,
-                    "&cSolo puedes expulsar a jugadores teniendo un rango superior al expulsado.");
+            Utils.errorMessage(sender,
+                    "Solo puedes expulsar a jugadores teniendo un rango superior al expulsado.");
             return;
         }
 
+        String confirmMessage = "&aInvitar a" + targetPlayer.getDisplayName();
+        List<String> confirmLore = new ArrayList<String>();
+        confirmLore.add("&7Click para invitar a" + targetPlayer.getDisplayName() + "!");
+        String cancelMessage = "&cCancelar invitacion";
+        List<String> cancelLore = new ArrayList<String>();
+        cancelLore.add("&7Click para cancelar la invitacion!");
+
+        ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage, confirmLore, cancelMessage,
+                cancelLore);
+
         ConfirmMenu confirmMenu = new ConfirmMenu(VitalCore.getPlayerMenuUtility(sender),
-                VitalCore.getMessagesConfigManager().getConfig());
+                VitalCore.fileManager.getMessagesFile().getConfig(), confirmMessages, "");
 
         confirmMenu.afterClose((condition) -> {
             if (condition) {
@@ -81,12 +100,11 @@ public class Kick extends SubCommand {
                 playerDB.setTribeId(t.getId());
                 UserCollection.savePlayer(playerDB);
 
-                Utils.logMessage(targetPlayer, "&cTe han expulsado de la tribu de &6" + tribeDB.getTribeName());
+                String kickSenderMessage = "Se ha expulsado correctamente a" + targetPlayer.getDisplayName();
+                String kickTargetMessage = "Te han expulsado de la tribu de &6" + tribeDB.getTribeName();
+                Utils.successMessage(sender, kickSenderMessage);
+                Utils.errorMessage(targetPlayer, kickTargetMessage);
             }
-
-            String onlineMessage = "&aSe ha expulsado correctamente a" + targetPlayer.getDisplayName();
-            Utils.logMessage(sender, onlineMessage);
-
         });
 
         confirmMenu.open();

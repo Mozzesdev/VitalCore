@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.utils;
+package me.winflix.vitalcore.files;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -6,9 +6,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 public class YmlFileManager {
 
@@ -20,28 +17,32 @@ public class YmlFileManager {
     public YmlFileManager(JavaPlugin plugin, String fileName) {
         this.plugin = plugin;
         this.fileName = fileName;
+        setup();
         saveDefaultConfig();
-        reloadConfig();
+        saveConfig();
     }
 
-    public void reloadConfig() {
-        if (configFile == null) {
-            configFile = new File(plugin.getDataFolder(), fileName);
+    public void setup() {
+        configFile = new File(plugin.getDataFolder(), fileName);
+
+        if (!configFile.exists()) {
+            try {
+                configFile.createNewFile();
+            } catch (IOException e) {
+            }
         }
         config = YamlConfiguration.loadConfiguration(configFile);
-
-        // Look for defaults in the jar
-        InputStream defConfigStream = plugin.getResource(fileName);
-        if (defConfigStream != null) {
-            config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, StandardCharsets.UTF_8)));
-        }
     }
 
     public FileConfiguration getConfig() {
         if (config == null) {
-            reloadConfig();
+            setup();
         }
         return config;
+    }
+
+    public void reloadConfig() {
+        config = YamlConfiguration.loadConfiguration(configFile);
     }
 
     public void saveConfig() {

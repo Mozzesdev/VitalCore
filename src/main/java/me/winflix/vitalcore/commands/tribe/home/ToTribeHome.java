@@ -1,5 +1,7 @@
 package me.winflix.vitalcore.commands.tribe.home;
 
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -34,6 +36,11 @@ public class ToTribeHome extends SubCommand {
     @Override
     public String getSyntax() {
         return "/tribe home";
+    }
+
+    @Override
+    public List<String> getSubCommandArguments(Player player, String[] args) {
+        return null;
     }
 
     @Override

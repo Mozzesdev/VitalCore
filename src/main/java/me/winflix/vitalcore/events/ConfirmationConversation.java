@@ -54,9 +54,10 @@ class ConfirmationPrompt extends ValidatingPrompt {
     public String getPromptText(ConversationContext context) {
         Player receiver = (Player) context.getForWhom();
         TitleManager.sendTitle(receiver, inviteTitle, "&e¡Decide tu respuesta!", 10, 100, 20);
-        return Utils.useColors(inviteMessage.replace("{sender}", context.getSessionData("sender").toString())
-                .replace("{acceptPrompt}", acceptPrompt)
-                .replace("{rejectPrompt}", rejectPrompt));
+        return Utils.useColors(
+                Utils.INFO_PREFIX + inviteMessage.replace("{sender}", context.getSessionData("sender").toString())
+                        .replace("{acceptPrompt}", acceptPrompt)
+                        .replace("{rejectPrompt}", rejectPrompt));
     }
 
     @Override

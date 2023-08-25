@@ -1,27 +1,27 @@
-package me.winflix.vitalcore.commands.tribe.menus;
+package me.winflix.vitalcore.commands.core.reload;
+
 import java.util.List;
 
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.commands.SubCommand;
-import me.winflix.vitalcore.menu.tribe.MembersMenu;
+import me.winflix.vitalcore.utils.Utils;
 
-public class Members extends SubCommand {
-
+public class Reload extends SubCommand {
     @Override
     public String getName() {
-        return "members";
+        return "reload";
     }
 
     @Override
     public String getVariants() {
-        return "mb";
+        return "r";
     }
 
     @Override
     public String getPermission() {
-        return null;
+        return "vitalcore.bypass";
     }
 
     @Override
@@ -31,7 +31,7 @@ public class Members extends SubCommand {
 
     @Override
     public String getSyntax() {
-        return "/tribe members";
+        return "/vcore reload";
     }
 
     @Override
@@ -41,6 +41,7 @@ public class Members extends SubCommand {
 
     @Override
     public void perform(Player p, String[] args) {
-        new MembersMenu(VitalCore.getPlayerMenuUtility(p)).open();
+        VitalCore.fileManager.reloadAllFiles();
+        Utils.successMessage(p, "Se ha recargado el plugin correctamente");
     }
 }

@@ -1,19 +1,24 @@
 package me.winflix.vitalcore.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.menu.Menu;
 import me.winflix.vitalcore.menu.PlayerMenuUtility;
+import me.winflix.vitalcore.utils.Utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class CommandManager implements CommandExecutor {
+public class CommandManager implements TabExecutor {
 
     private ArrayList<SubCommand> subcommands = new ArrayList<>();
     private Class<? extends Menu> menu;
@@ -27,37 +32,94 @@ public class CommandManager implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            return true; // No es un jugador, salimos
+        }
 
-        if (sender instanceof Player) {
-            Player p = (Player) sender;
+        Player player = (Player) sender;
 
-            if (args.length == 0) {
-                if (menu != null) {
-                    try {
-                        Constructor<? extends Menu> constructor = menu.getDeclaredConstructor(PlayerMenuUtility.class);
-                        Menu instance = constructor.newInstance(VitalCore.getPlayerMenuUtility(p));
-                        instance.open();
-                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
-                            | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                for (int i = 0; i < getSubcommands().size(); i++) {
-                    if (args[0].equalsIgnoreCase(getSubcommands().get(i).getName())
-                            || args[0].equalsIgnoreCase(getSubcommands().get(i).getVariants())) {
-                        getSubcommands().get(i).perform(p, args);
-                    }
-                }
-            }
-
+        if (args.length == 0) {
+            openMenu(player);
+        } else {
+            executeSubcommand(player, args);
         }
 
         return true;
     }
 
-    public ArrayList<SubCommand> getSubcommands() {
+    private void openMenu(Player player) {
+        if (menu == null) {
+            return;
+        }
+
+        try {
+            Constructor<? extends Menu> constructor = menu.getDeclaredConstructor(PlayerMenuUtility.class);
+            Menu instance = constructor.newInstance(VitalCore.getPlayerMenuUtility(player));
+            instance.open();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void executeSubcommand(Player player, String[] args) {
+        for (SubCommand subCommand : getSubCommands()) {
+            if (!player.isOp()) {
+                if (subCommand.getPermission() != null && !player.hasPermission(subCommand.getPermission())) {
+                    Utils.errorMessage(player, "No tienes permisos para ejecutar este comando.");
+                    return;
+                }
+            }
+
+            if (args[0].equalsIgnoreCase(subCommand.getName()) || args[0].equalsIgnoreCase(subCommand.getVariants())) {
+                subCommand.perform(player, args);
+                return; // Terminamos aquí después de ejecutar un subcomando
+            }
+        }
+
+        Utils.errorMessage(player, "Comando desconocido o no tienes permisos para ejecutarlo.");
+    }
+
+    public ArrayList<SubCommand> getSubCommands() {
         return subcommands;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!(sender instanceof Player)) {
+            return Collections.emptyList();
+        }
+
+        Player player = (Player) sender;
+
+        if (args.length == 1) { // prank <subcommand> <args>
+            return getSubCommands().stream()
+                    .filter(subCommand -> (player.isOp() ? true
+                            : subCommand.getPermission() == null
+                                    || player.hasPermission(subCommand.getPermission())))
+                    .map(SubCommand::getName)
+                    .collect(Collectors.toList());
+        } else if (args.length >= 2) {
+            String requestedSubCommand = args[0].toLowerCase(); // Convert to lowercase for case-insensitive comparison
+
+            for (SubCommand subCommand : getSubCommands()) {
+                if (requestedSubCommand.equals(subCommand.getName())) {
+                    List<String> subCommandArguments = subCommand.getSubCommandArguments(player, args);
+
+                    if (subCommandArguments == null) {
+                        List<String> playerNames = Bukkit.getServer().getOnlinePlayers()
+                                .stream()
+                                .map(Player::getName)
+                                .collect(Collectors.toList());
+                        return playerNames;
+                    } else {
+                        return subCommandArguments;
+                    }
+                }
+            }
+        }
+
+        return Collections.emptyList();
     }
 
 }

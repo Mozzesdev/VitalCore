@@ -1,5 +1,7 @@
 package me.winflix.vitalcore.commands.tribe.menus;
 
+import java.util.List;
+
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
@@ -31,6 +33,11 @@ public class Menu extends SubCommand {
     @Override
     public String getSyntax() {
         return "/tribe menu";
+    }
+
+    @Override
+    public List<String> getSubCommandArguments(Player player, String[] args) {
+        return null;
     }
 
     @Override

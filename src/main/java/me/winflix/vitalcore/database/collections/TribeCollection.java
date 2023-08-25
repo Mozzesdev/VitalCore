@@ -1,5 +1,6 @@
 package me.winflix.vitalcore.database.collections;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
+import me.winflix.vitalcore.VitalCore;
+import me.winflix.vitalcore.files.TribeFile;
 import me.winflix.vitalcore.models.TribeMember;
 import me.winflix.vitalcore.models.TribeModel;
 import me.winflix.vitalcore.utils.RankManager;
@@ -31,12 +34,23 @@ public class TribeCollection {
     }
 
     public static TribeModel createTribe(Player player) {
-        TribeMember owner = new TribeMember(player.getDisplayName(), player.getUniqueId().toString());
-        String tribeName = "Tribe_of_" + owner.getPlayerName();
+        String playerName = player.getDisplayName();
+        UUID playerUUID = player.getUniqueId();
+
+        TribeMember owner = new TribeMember(playerName, playerUUID.toString());
         owner.setRange(RankManager.OWNER_RANK);
-        TribeModel tribeModel = new TribeModel(tribeName, UUID.randomUUID().toString());
+
+        String tribeName = "Tribe_of_" + owner.getPlayerName();
+        String tribeId = UUID.randomUUID().toString();
+
+        TribeModel tribeModel = new TribeModel(tribeName, tribeId);
         tribeModel.addMember(owner);
+
+        TribeFile tribeFile = new TribeFile(VitalCore.getPlugin(), tribeId + ".yml", "tribes", tribeModel);
+        VitalCore.fileManager.getTribesFiles().add(tribeFile);
+
         tribesCollection.insertOne(tribeModel);
+
         return tribeModel;
     }
 
@@ -49,11 +63,38 @@ public class TribeCollection {
     }
 
     public static TribeModel saveTribe(TribeModel tribe) {
-        return tribesCollection.findOneAndReplace(Filters.eq("_id", tribe.getId()), tribe);
+        // Eliminar el archivo YAML antiguo solo si existe
+        TribeFile oldFile = VitalCore.fileManager.getTribeFile(tribe.getId());
+        if (oldFile.getFile().exists()) {
+            oldFile.getFile().delete();
+            VitalCore.fileManager.getTribesFiles().remove(oldFile);
+        }
+
+        // Crear un nuevo archivo YAML y agregarlo a la lista de archivos
+        TribeFile newFile = new TribeFile(VitalCore.getPlugin(), tribe.getId() + ".yml", "tribes", tribe);
+        VitalCore.fileManager.getTribesFiles().add(newFile);
+
+        // Reemplazar el documento en la colección
+        tribesCollection.findOneAndReplace(Filters.eq("_id", tribe.getId()), tribe);
+
+        return tribe;
     }
 
-    public static void deleteTribe(TribeModel t) {
-        tribesCollection.deleteOne(Filters.eq("_id", t.getId()));
+    public static void deleteTribe(TribeModel tribe) {
+        try {
+            TribeFile tribeFile = VitalCore.fileManager.getTribeFile(tribe.getId());
+            File yamlFile = tribeFile.getFile();
+
+            if (yamlFile.exists() && yamlFile.delete()) {
+                System.out.println("Archivo de tribu eliminado: " + yamlFile.getPath());
+            } else {
+                System.out.println("No se pudo eliminar el archivo de tribu: " + yamlFile.getPath());
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+
+        tribesCollection.deleteOne(Filters.eq("_id", tribe.getId()));
     }
 
     public static ArrayList<TribeModel> getAllTribes() {

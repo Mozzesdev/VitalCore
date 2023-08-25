@@ -12,6 +12,7 @@ import me.winflix.vitalcore.commands.SubCommand;
 import me.winflix.vitalcore.database.collections.TribeCollection;
 import me.winflix.vitalcore.database.collections.UserCollection;
 import me.winflix.vitalcore.events.ConfirmationConversation;
+import me.winflix.vitalcore.interfaces.ConfirmMessages;
 import me.winflix.vitalcore.interfaces.ConfirmationHandler;
 import me.winflix.vitalcore.menu.ConfirmMenu;
 import me.winflix.vitalcore.models.PlayerModel;
@@ -55,23 +56,28 @@ public class Invite extends SubCommand {
     }
 
     @Override
+    public List<String> getSubCommandArguments(Player player, String[] args) {
+        return null;
+    }
+
+    @Override
     public void perform(Player p, String[] args) {
         if (args.length <= 1) {
-            p.sendMessage(Utils.useColors("&cSyntax error: use " + getSyntax()));
+            Utils.errorMessage(p, "Syntax error: use " + getSyntax());
             return;
         }
         PlayerModel senderPlayer = UserCollection.getPlayerWithTribe(p.getUniqueId());
         TribeModel senderTribe = senderPlayer.getTribe();
 
         if (!senderTribe.isOpen()) {
-            Utils.logMessage(p, "&cLa tribu actualmente esta cerrada a nuevos miembros.");
+            Utils.errorMessage(p, "La tribu actualmente esta cerrada a nuevos miembros.");
             return;
         }
 
         PlayerRank senderRank = senderTribe.getMember(p.getUniqueId()).getRange();
 
         if (!senderRank.isCanInvite()) {
-            Utils.logMessage(p, "&cNo tienes permitido invitar a nuevos miembros.");
+            Utils.errorMessage(p, "No tienes permitido invitar a nuevos miembros.");
             return;
         }
 
@@ -96,21 +102,31 @@ public class Invite extends SubCommand {
     private void handleOnlineInvitation(Player inviter, Player targetPlayer, List<String> onlinePlayers,
             TribeModel senderTribe) {
         if (targetPlayer.equals(inviter)) {
-            inviter.sendMessage(Utils.useColors("&cNo puedes invitarte a ti mismo."));
+            Utils.errorMessage(inviter, "No puedes invitarte a ti mismo.");
         } else if (senderTribe.getMember(targetPlayer.getUniqueId()) == null) {
             sendInvitationConfirmation(inviter, targetPlayer, senderTribe);
             onlinePlayers.add(targetPlayer.getName());
         } else {
-            inviter.sendMessage(
-                    Utils.useColors("&cEl jugador " + targetPlayer.getDisplayName() + " ya se encuentra en tu tribu."));
+            Utils.errorMessage(inviter,
+                    "El jugador &b" + targetPlayer.getDisplayName() + " &cya se encuentra en tu tribu.");
         }
     }
 
     private void sendInvitationConfirmation(Player inviter, Player targetPlayer, TribeModel senderTribe) {
         ConfirmationHandler customHandler = (s, r, confirmed) -> {
             if (confirmed) {
+                
+                String confirmMessage = "&aInvitar a" + targetPlayer.getDisplayName();
+                List<String> confirmLore = new ArrayList<String>();
+                confirmLore.add("&7Click para invitar a" + targetPlayer.getDisplayName() + "!");
+                String cancelMessage = "&cCancelar invitacion";
+                List<String> cancelLore = new ArrayList<String>();
+                cancelLore.add("&7Click para cancelar la invitacion!");
+
+                ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage, confirmLore, cancelMessage,
+                        cancelLore);
                 ConfirmMenu confirmMenu = new ConfirmMenu(VitalCore.getPlayerMenuUtility(r),
-                        VitalCore.getMessagesConfigManager().getConfig());
+                        VitalCore.fileManager.getMessagesFile().getConfig(), confirmMessages, "");
                 confirmMenu.afterClose((condition) -> {
                     if (condition) {
                         PlayerModel recieverPlayer = UserCollection.getPlayerWithTribe(r.getUniqueId());
@@ -121,7 +137,7 @@ public class Invite extends SubCommand {
 
                         if (recieverMember != null) {
                             if (recieverTribe.getMembers().size() > 1) {
-                                if (recieverMember.getRange().isCanInvite()) {
+                                if (recieverMember.getRange().getName().equals(RankManager.OWNER_RANK.getName())) {
                                     TribeMember newOwner = recieverTribe.getDiferentMember(r.getUniqueId());
                                     newOwner.setRange(RankManager.OWNER_RANK);
                                     recieverTribe.replaceMember(UUID.fromString(newOwner.getId()), newOwner);
@@ -136,42 +152,43 @@ public class Invite extends SubCommand {
                             TribeCollection.saveTribe(senderTribe);
 
                             recieverPlayer.setTribeId(senderTribe.getId());
+                            recieverPlayer.setTribe(null);
                             UserCollection.savePlayer(recieverPlayer);
 
-                            Utils.logMessage(r,
+                            Utils.successMessage(r,
                                     "&cTe has unido a la tribu de &6"
                                             + senderTribe.getTribeName().replaceAll("-", " "));
                             Utils.castMessageToAllMembersTribe(senderTribe,
                                     "Se ha añadido a la tribu a: " + r.getDisplayName());
                         }
                     } else {
-                        s.sendMessage("Han rechazado tu invitacion");
-                        r.sendMessage("Has rechazado la invitacion");
+                        Utils.errorMessage(s, "Han rechazado tu invitacion");
+                        Utils.errorMessage(r, "Has rechazado la invitacion");
                     }
                 });
                 confirmMenu.open();
             } else {
-                s.sendMessage("Se ha cancelado la conversacion");
-                r.sendMessage("Has cancelado la conversacion");
+                Utils.errorMessage(s, "Se ha cancelado la conversacion");
+                Utils.errorMessage(r, "Has cancelado la conversacion");
             }
         };
 
         ConfirmationConversation confirmation = new ConfirmationConversation(inviter, targetPlayer, plugin,
-                VitalCore.getMessagesConfigManager().getConfig(), customHandler);
+                VitalCore.fileManager.getMessagesFile().getConfig(), customHandler);
         confirmation.start();
     }
 
     private void sendOnlineInvitationMessage(Player inviter, List<String> onlinePlayers) {
         if (!onlinePlayers.isEmpty()) {
-            String onlineMessage = "Se envió la invitación a: " + String.join(", ", onlinePlayers);
-            inviter.sendMessage(Utils.useColors(onlineMessage));
+            String onlineMessage = "Se envió la invitación a: &b" + String.join("&a, &b", onlinePlayers);
+            Utils.successMessage(inviter, onlineMessage);
         }
     }
 
     private void sendOfflineInvitationMessage(Player inviter, List<String> offlinePlayers) {
         if (!offlinePlayers.isEmpty()) {
-            String offlineMessage = "Estos jugadores no están en línea: " + String.join(", ", offlinePlayers);
-            inviter.sendMessage(Utils.useColors(offlineMessage));
+            String offlineMessage = "Estos jugadores no están en línea: &b" + String.join("&c, &b", offlinePlayers);
+            Utils.errorMessage(inviter, offlineMessage);
         }
     }
 }

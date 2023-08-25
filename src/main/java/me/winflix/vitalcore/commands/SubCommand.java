@@ -1,5 +1,7 @@
 package me.winflix.vitalcore.commands;
 
+import java.util.List;
+
 import org.bukkit.entity.Player;
 
 public abstract class SubCommand {
@@ -17,6 +19,9 @@ public abstract class SubCommand {
 
     // How to use command ex. /prank freeze <player>
     public abstract String getSyntax();
+
+    // name of the subcommandArgument ex. /prank <subcommand> <-- that
+    public abstract List<String> getSubCommandArguments(Player player, String args[]);
 
     // code for the subcommand
     public abstract void perform(Player player, String args[]);

@@ -1,5 +1,7 @@
 package me.winflix.vitalcore.commands.tribe.home;
 
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -38,6 +40,11 @@ public class SetTribeHome extends SubCommand {
     }
 
     @Override
+    public List<String> getSubCommandArguments(Player player, String[] args) {
+        return null;
+    }
+
+    @Override
     public void perform(Player p, String[] args) {
         Location loc = p.getLocation();
         String world = loc.getWorld().getName();
@@ -49,9 +56,9 @@ public class SetTribeHome extends SubCommand {
             TribeModel playerTribe = playerDB.getTribe();
             playerTribe.setTribeHome(tribeHome);
             TribeCollection.saveTribe(playerTribe);
-            p.sendMessage(Utils.useColors("&aTribe home was saved"));
+            Utils.successMessage(p, "Tribe home was saved");
         } else {
-            p.sendMessage(Utils.useColors("&cOnly you can make a tribehome in overworld"));
+            Utils.errorMessage(p, "Only you can make a tribehome in overworld");
         }
 
     }
