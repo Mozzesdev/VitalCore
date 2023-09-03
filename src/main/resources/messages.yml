@@ -1,12 +1,67 @@
 prefixes:
-  error: "&7[&6VitalCore&7] -> &c"
-  success: "&7[&aVitalCore&7] -> &a"
-  info: "&8[&7VitalCore&8] -> &7"
-inviteTitle: "#F04747Has Recibido una Invitación!"
-inviteMessage: "Has recibido una invitación de la tribu de {sender}! (Decide con 's' o 'n' para confirmar)"
-acceptPrompt: "s"
-rejectPrompt: "n"
-acceptedMessageSender: "{receiver} ha aceptado la invitación a la tribu."
-rejectedMessageSender: "{receiver} ha rechazado la invitación a la tribu."
-acceptedMessageReceiver: "Has aceptado la invitación a la tribu de {sender}."
-rejectedMessageReceiver: "Has rechazado la invitación a la tribu de {sender}."
+  error: "&7[&6${plugin}&7] ->&c"
+  success: "&7[&a${plugin}&7] ->&a"
+  info: "&8[&7${plugin}&8] ->&7"
+tribes:
+  invites:
+    menu:
+      title: "&c¡Seguro te deseas unir a la tribu?!"
+      accept:
+        message: "&aAceptar invitacion"
+        lore:
+          - ""
+      reject:
+        message: "&cNo aceptar invitacion"
+        lore:
+          - ""
+    target:
+      invite: "Has recibido una invitación para unirte a la tribu de ${tribe:name}!"
+      accept: "Has aceptado la invitación a la tribu de ${tribe:name}."
+      rejected: "Has rechazado la invitación a la tribu de ${tribe:name}."
+    off-target:
+      invite: "Has enviado una invitación a ${target:name}"
+      accept: "${target:name} ha aceptado la invitación a la tribu."
+      rejected: "${target:name} ha rechazado la invitación a la tribu."
+  conversations:
+    message: "Has recibido una invitación para unirte a la tribu de ${tribe:name}! (Confirma con '${pr:accept}'' o '${pr:reject}')"
+    prompts:
+      accept: "s"
+      reject: "n"
+  promotes:
+    menu:
+      title: "&c¿Deseas promover a ${target:name}?"
+      accept:
+        message: "&aEstoy seguro"
+        lore:
+          - ""
+      reject:
+        message: "&cNo estoy seguro"
+        lore:
+          - ""
+    target:
+      promote: ""
+      accept: "Has sido promovido a el rango ${tribe:rank} en la tribu de ${tribe:name}."
+      rejected: ""
+    off-target:
+      promote: ""
+      accept: "Has promovido a ${target:name} al rango ${tribe:name}."
+      rejected: "Has cancelado la promocion a ${target:name}."
+  homes:
+    add:
+      success: "Se guardó correctamente la casa de tu tribu."
+      error: ""
+      restricted: "Sólo puedes crear la casa de tu tribu en el overworld."
+    remove:
+      success: ""
+      error: ""
+    to:
+      success: ""
+      error: ""
+      canceled: ""
+  commands:
+    unknown: "Comando desconocido o no tienes permisos para ejecutarlo."
+    syntax: "Syntax error: use ${cm:syntax}"
+    invite:
+      syntax: "/tribe invite <player>"
+      description: "This command invite a player to your tribe."
+reload: "Se ha recargado el plugin correctamente"
