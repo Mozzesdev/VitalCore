@@ -51,6 +51,15 @@ public class ToTribeHome extends SubCommand {
         User pdb = UsersCollection.getUserWithTribe(p.getUniqueId());
         String tribeHome = pdb.getTribe().getTribeHome();
 
+        FileConfiguration messagesFile = VitalCore.fileManager.getMessagesFile().getConfig();
+        String successMessage = messagesFile.getString("tribes.homes.to.success");
+        String errorMessage = messagesFile.getString("tribes.homes.to.error");
+
+        if(tribeHome.length() == 0){
+            Utils.errorMessage(p, errorMessage);
+            return;
+        }
+
         String[] split = tribeHome.split(";");
         World world = Bukkit.getServer().getWorld(split[0]);
         double x = Double.parseDouble(split[1]);
@@ -60,9 +69,6 @@ public class ToTribeHome extends SubCommand {
         float pitch = Float.parseFloat(split[5]);
         p.teleport(new Location(world, x, y, z, yaw, pitch));
 
-        FileConfiguration messagesFile = VitalCore.fileManager.getMessagesFile().getConfig();
-        String message = messagesFile.getString("tribes.homes.to.success");
-
-        Utils.successMessage(p, message);
+        Utils.successMessage(p, successMessage);
     }
 }

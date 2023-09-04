@@ -24,12 +24,12 @@ public class VitalCore extends JavaPlugin {
   public void onEnable() {
     plugin = this;
 
-    new VCoreManager().initialize();
     new TribeManager().initialize();
+    new VCoreManager().initialize();
     registerGeneralEvents();
 
     Database.connect();
-    fileManager = new FileManager();
+    fileManager = new FileManager(plugin);
 
     Log.info(Utils.useColors("&ahas been enabled"));
   }

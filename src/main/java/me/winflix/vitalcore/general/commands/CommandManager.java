@@ -65,7 +65,7 @@ public class CommandManager implements TabExecutor {
 
     private void executeSubcommand(Player player, String[] args) {
         FileConfiguration messageFile = VitalCore.fileManager.messagesFile.getConfig();
-        String message = messageFile.getString("commands.unknown");
+        String message = messageFile.getString("general.commands.unknown");
 
         for (SubCommand subCommand : getSubCommands()) {
             if (!player.isOp()) {

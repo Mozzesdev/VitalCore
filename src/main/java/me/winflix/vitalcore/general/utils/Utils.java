@@ -1,12 +1,15 @@
 package me.winflix.vitalcore.general.utils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
 
+import me.winflix.vitalcore.VitalCore;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -33,18 +36,27 @@ public class Utils {
     }
 
     public static void infoMessage(Player p, String message) {
-        p.sendMessage(useColors(INFO_PREFIX + message));
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(Placeholders.PLUGIN_NAME, VitalCore.getPlugin().getName());
+        String messageFormat = Placeholders.replacePlaceholders(INFO_PREFIX + message, placeholders);
+        p.sendMessage(useColors(messageFormat));
     }
 
     public static void errorMessage(Player p, String message) {
-        p.sendMessage(useColors(ERROR_PREFIX + message));
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(Placeholders.PLUGIN_NAME, VitalCore.getPlugin().getName());
+        String messageFormat = Placeholders.replacePlaceholders(ERROR_PREFIX + message, placeholders);
+        p.sendMessage(useColors(messageFormat));
     }
 
     public static void successMessage(Player p, String message) {
-        p.sendMessage(useColors(SUCCESS_PREFIX + message));
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(Placeholders.PLUGIN_NAME, VitalCore.getPlugin().getName());
+        String messageFormat = Placeholders.replacePlaceholders(SUCCESS_PREFIX + message, placeholders);
+        p.sendMessage(useColors(messageFormat));
     }
 
-    public static void sendClickableCommand(Player player, ClickableMessage... message) {
+    public static void sendClickableAction(Player player, ClickableMessage... message) {
         List<ClickableMessage> messageList = Arrays.asList(message);
         ComponentBuilder component = new ComponentBuilder();
         messageList.forEach(m -> {
@@ -66,5 +78,4 @@ public class Utils {
         player.spigot().sendMessage(component.create());
     }
 
-    
 }

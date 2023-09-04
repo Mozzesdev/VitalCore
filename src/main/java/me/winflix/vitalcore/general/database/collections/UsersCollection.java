@@ -26,13 +26,13 @@ import me.winflix.vitalcore.tribe.models.User;
 public class UsersCollection {
 
     public static MongoCollection<User> userCollection;
+    public static VitalCore plugin = VitalCore.getPlugin();
 
     public static void initialize(MongoDatabase database) {
         PojoCodecProvider pojoAutoProvider = PojoCodecProvider.builder().automatic(true).build();
         CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
                 MongoClientSettings.getDefaultCodecRegistry(),
                 CodecRegistries.fromProviders(pojoAutoProvider));
-
         userCollection = database.getCollection("Users", User.class).withCodecRegistry(pojoCodecRegistry);
     }
 
@@ -46,7 +46,7 @@ public class UsersCollection {
         String playerFileName = playerId;
 
         User playerModel = new User(playerDisplayName, playerId, tribe.getId());
-        UserFile playerFile = new UserFile(playerFileName, "users", playerModel);
+        UserFile playerFile = new UserFile(plugin, playerFileName, "users", playerModel);
 
         VitalCore.fileManager.getUsersFiles().add(playerFile); // Agregar a la lista de archivos
 
@@ -65,7 +65,7 @@ public class UsersCollection {
         }
 
         // Crear un nuevo archivo YAML y agregarlo a la lista de archivos
-        UserFile newFile = new UserFile(p.getId(), "users", p);
+        UserFile newFile = new UserFile(plugin, p.getId(), "users", p);
         VitalCore.fileManager.getUsersFiles().add(newFile);
 
         // Reemplazar el documento en la colección
@@ -76,19 +76,19 @@ public class UsersCollection {
 
     public static User getUserWithTribe(UUID playerId) {
         UserFile playerFile = VitalCore.fileManager.getUserFile(playerId.toString());
-        File playerYamlFile = new File(playerFile.getAllPath());
 
-        if (!playerYamlFile.exists()) {
+        if (playerFile == null) {
             User userDB = getUser(playerId);
 
             if (userDB == null) {
-                return null; // El archivo no existe, el jugador no se puede cargar
+                return null;
             }
 
-            playerFile = new UserFile(userDB.getId(), "users", userDB);
-            playerYamlFile = new File(playerFile.getAllPath());
+            playerFile = new UserFile(plugin, userDB.getId(), "users", userDB);
             VitalCore.fileManager.getUsersFiles().add(playerFile);
         }
+
+        File playerYamlFile = new File(playerFile.getPath());
 
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -96,7 +96,7 @@ public class UsersCollection {
 
             if (player != null && player.getTribeId() != null) {
                 TribeFile tribeFile = VitalCore.fileManager.getTribeFile(player.getTribeId());
-                File tribeYamlFile = new File(tribeFile.getAllPath());
+                File tribeYamlFile = new File(tribeFile.getPath());
 
                 if (tribeYamlFile.exists()) {
                     Tribe tribe = mapper.readValue(tribeYamlFile, Tribe.class);
@@ -109,6 +109,16 @@ public class UsersCollection {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static boolean syncDBWithFiles() {
+        try {
+            VitalCore.fileManager.setupUsersFiles();
+            VitalCore.fileManager.setupTribesFiles();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     public static ArrayList<User> getAllUsers() {

@@ -1,7 +1,7 @@
 prefixes:
-  error: "&7[&6${plugin}&7] ->&c"
-  success: "&7[&a${plugin}&7] ->&a"
-  info: "&8[&7${plugin}&8] ->&7"
+  error: "&7[&6${plugin}&7] ->&c "
+  success: "&7[&a${plugin}&7] ->&a "
+  info: "&8[&7${plugin}&8] ->&7 "
 tribes:
   invites:
     menu:
@@ -18,15 +18,21 @@ tribes:
       invite: "Has recibido una invitación para unirte a la tribu de ${tribe:name}!"
       accept: "Has aceptado la invitación a la tribu de ${tribe:name}."
       rejected: "Has rechazado la invitación a la tribu de ${tribe:name}."
+      clickable:
+        message: "Has recibido una invitación para unirte a la tribu de ${tribe:name}! &7(&a${clk:accept} &b|| &c${clk:reject}&7)"
+        accept: "&aAceptar"
+        reject: "&bRechazar"
     off-target:
       invite: "Has enviado una invitación a ${target:name}"
       accept: "${target:name} ha aceptado la invitación a la tribu."
       rejected: "${target:name} ha rechazado la invitación a la tribu."
-  conversations:
-    message: "Has recibido una invitación para unirte a la tribu de ${tribe:name}! (Confirma con '${pr:accept}'' o '${pr:reject}')"
-    prompts:
-      accept: "s"
-      reject: "n"
+    options:
+      close: "La tribu actualmente está cerrada a nuevos miembros."
+      open: "La tribu actualmente está abierta a nuevos miembros"
+      cant-invite: "No tienes permitido invitar a nuevos miembros."
+      offline: "El jugador ${target:name} no esta actualmente en linea."
+      self: "No puedes invitarte a ti mismo a tu tribu."
+      exist: "El jugador ${target:name} ya se encuentra actualmente en tu tribu."
   promotes:
     menu:
       title: "&c¿Deseas promover a ${target:name}?"
@@ -55,13 +61,16 @@ tribes:
       success: ""
       error: ""
     to:
-      success: ""
-      error: ""
+      success: "Te has teletransportado correctamente a la casa de tu tribu"
+      error: "No has podido ir a la casa de tu tribu, verifica si existe y intentalo de nuevo."
       canceled: ""
   commands:
     unknown: "Comando desconocido o no tienes permisos para ejecutarlo."
-    syntax: "Syntax error: use ${cm:syntax}"
+    syntax: "&bSyntax error: use ${cm:syntax}"
     invite:
       syntax: "/tribe invite <player>"
       description: "This command invite a player to your tribe."
 reload: "Se ha recargado el plugin correctamente"
+general:
+  commands:
+    unknown: "Comando desconocido o no tienes permisos para ejecutarlo."

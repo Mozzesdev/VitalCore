@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.general.interfaces;
+package me.winflix.vitalcore.general.menu.confirm;
 
 import java.util.List;
 

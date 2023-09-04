@@ -8,7 +8,6 @@ import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.core.commands.Reload;
 import me.winflix.vitalcore.general.commands.CommandManager;
 import me.winflix.vitalcore.general.commands.SubCommand;
-import me.winflix.vitalcore.tribe.menu.TribeMenu;
 
 public class VCoreManager {
     VitalCore plugin = VitalCore.getPlugin();
@@ -19,12 +18,13 @@ public class VCoreManager {
         setupCommands();
     }
 
-    public void setupEvents() {}
+    public void setupEvents() {
+    }
 
     public void setupCommands() {
         registerCommands();
         PluginCommand vCommand = plugin.getCommand("vcore");
-        CommandManager vCommandManager = new CommandManager(plugin, vCoreCommands, TribeMenu.class);
+        CommandManager vCommandManager = new CommandManager(plugin, vCoreCommands, null);
         vCommand.setExecutor(vCommandManager);
     }
 

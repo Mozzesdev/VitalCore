@@ -9,25 +9,43 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 
 public abstract class YmlFile {
 
-    private final VitalCore plugin = VitalCore.getPlugin();
-    private final String path;
-    private final String folderpath;
+    private final VitalCore plugin;
+    private final String fileName;
+    private final String folder;
     private File file;
     private FileConfiguration customFile;
-    private final String allPath;
+    private final String path;
 
-    public YmlFile(String fileName, String folder) {
-        this.path = fileName.toLowerCase().endsWith(".yml") ? fileName : fileName + ".yml";
-        this.folderpath = folder;
-        this.allPath = plugin.getDataFolder() + File.separator + folderpath;
-        create();
+    public YmlFile(VitalCore plugin, String fileName, String folder) {
+        this.plugin = plugin;
+        this.fileName = fileName.toLowerCase().endsWith(".yml") ? fileName : fileName + ".yml";
+        this.folder = folder;
+        this.path = plugin.getDataFolder() + File.separator + this.folder + File.separator + this.fileName;
+        this.file = null;
+        this.customFile = null;
     }
 
     public abstract void create();
+
+    public File getFile() {
+        return file;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
 
     public FileConfiguration getConfig() {
         if (customFile == null) {
@@ -36,27 +54,22 @@ public abstract class YmlFile {
         return customFile;
     }
 
-    public File getFile() {
-        return file;
-    }
-
-    public String getAllPath() {
-        return allPath + File.separator + path;
-    }
-
     public void reloadConfig() {
         if (customFile == null) {
-            file = new File(allPath, path);
+            file = new File(path);
         }
         customFile = YamlConfiguration.loadConfiguration(file);
-
-        try (Reader defaultConfigStream = new InputStreamReader(plugin.getResource(path), StandardCharsets.UTF_8)) {
+        Reader defaultConfigStream;
+        try {
+            defaultConfigStream = new InputStreamReader(plugin.getResource(fileName), "UTF8");
             if (defaultConfigStream != null) {
                 YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(defaultConfigStream);
                 customFile.setDefaults(defaultConfig);
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (UnsupportedEncodingException ex) {
+            ex.getMessage();
+        } catch (NullPointerException e) {
+            e.getMessage();
         }
     }
 
@@ -72,13 +85,5 @@ public abstract class YmlFile {
         if (!file.exists()) {
             plugin.saveResource(path, false);
         }
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getFolderpath() {
-        return folderpath;
     }
 }

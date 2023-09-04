@@ -23,6 +23,7 @@ import me.winflix.vitalcore.tribe.utils.RankManager;
 public class TribesCollection {
 
     public static MongoCollection<Tribe> tribesCollection;
+    public static VitalCore plugin = VitalCore.getPlugin();
 
     public static void initialize(MongoDatabase database) {
         PojoCodecProvider pojoAutoProvider = PojoCodecProvider.builder().automatic(true).build();
@@ -46,7 +47,7 @@ public class TribesCollection {
         Tribe tribeModel = new Tribe(tribeName, tribeId);
         tribeModel.addMember(owner);
 
-        TribeFile tribeFile = new TribeFile(tribeId, "tribes", tribeModel);
+        TribeFile tribeFile = new TribeFile(plugin, tribeId, "tribes", tribeModel);
         VitalCore.fileManager.getTribesFiles().add(tribeFile);
 
         tribesCollection.insertOne(tribeModel);
@@ -71,7 +72,7 @@ public class TribesCollection {
         }
 
         // Crear un nuevo archivo YAML y agregarlo a la lista de archivos
-        TribeFile newFile = new TribeFile(tribe.getId(), "tribes", tribe);
+        TribeFile newFile = new TribeFile(plugin, tribe.getId(), "tribes", tribe);
         VitalCore.fileManager.getTribesFiles().add(newFile);
 
         // Reemplazar el documento en la colección

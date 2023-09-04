@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.files.YmlFile;
 import me.winflix.vitalcore.tribe.models.Tribe;
 
@@ -13,14 +14,15 @@ public class TribeFile extends YmlFile {
 
     private Tribe tribe;
 
-    public TribeFile(String path, String folder, Tribe tribe) {
-        super(path, folder);
+    public TribeFile(VitalCore plugin, String fileName, String folder, Tribe tribe) {
+        super(plugin, fileName, folder);
         this.tribe = tribe;
+        create();
     }
 
     @Override
     public void create() {
-        File file = new File(getAllPath());
+        File file = new File(getPath());
 
         if (!file.exists()) {
             if (tribe != null) {
@@ -33,7 +35,6 @@ public class TribeFile extends YmlFile {
             }
         }
 
-        reloadConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
     }

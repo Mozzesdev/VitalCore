@@ -18,6 +18,8 @@ public class Placeholders {
 
     public final static String COMMAND_SYNTAX = "${cm:syntax}";
 
+    public final static String PLUGIN_NAME = "${plugin}";
+
     public static String replacePlaceholders(String message, Map<String, String> placeholders) {
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
             String placeholder = entry.getKey();

@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
+import com.mongodb.ServerApi;
+import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -35,8 +37,11 @@ public class Database {
     private static MongoClientSettings createMongoClientSettings() {
         ConnectionString connectionString = new ConnectionString(
                 "mongodb+srv://Winflix:vjvUdFvRcdHd7gVW@spigotcluster.3drjzzo.mongodb.net/?retryWrites=true&w=majority");
+        ServerApi serverApi = ServerApi.builder()
+                .version(ServerApiVersion.V1)
+                .build();
         return MongoClientSettings.builder().uuidRepresentation(UuidRepresentation.STANDARD)
-                .applyConnectionString(connectionString)
+                .applyConnectionString(connectionString).serverApi(serverApi)
                 .build();
     }
 

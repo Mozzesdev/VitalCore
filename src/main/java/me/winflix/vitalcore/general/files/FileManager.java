@@ -19,15 +19,16 @@ public class FileManager {
 
     private static final String TRIBES_FOLDER = "tribes";
     private static final String USERS_FOLDER = "users";
-    private static final String MESSAGES_FILE_NAME = "En_en.yml";
+    private static final String MESSAGES_FILE_NAME = "en";
     private static final String I18N_FOLDER = "i18n";
     public List<TribeFile> tribeFiles = new ArrayList<>();
     public List<UserFile> usersFiles = new ArrayList<>();
-    private VitalCore plugin = VitalCore.getPlugin();
     public FileConfiguration configFile;
     public MessagesFile messagesFile;
+    public VitalCore plugin;
 
-    public FileManager() {
+    public FileManager(VitalCore plugin) {
+        this.plugin = plugin;
         configFile = plugin.getConfig();
         setupFolders();
         setupConfigFile();
@@ -55,7 +56,7 @@ public class FileManager {
     public void setupTribesFiles() {
         tribeFiles = TribesCollection.getAllTribes().stream()
                 .map(tribe -> {
-                    return new TribeFile(tribe.getId(), TRIBES_FOLDER, tribe);
+                    return new TribeFile(plugin, tribe.getId(), TRIBES_FOLDER, tribe);
                 })
                 .collect(Collectors.toList());
     }
@@ -63,13 +64,13 @@ public class FileManager {
     public void setupUsersFiles() {
         usersFiles = UsersCollection.getAllUsers().stream()
                 .map(player -> {
-                    return new UserFile(player.getId(), USERS_FOLDER, player);
+                    return new UserFile(plugin, player.getId(), USERS_FOLDER, player);
                 })
                 .collect(Collectors.toList());
     }
 
     public void setupMessagesFiles() {
-        messagesFile = new MessagesFile(MESSAGES_FILE_NAME, I18N_FOLDER);
+        messagesFile = new MessagesFile(plugin, MESSAGES_FILE_NAME, I18N_FOLDER);
     }
 
     public void setupConfigFile() {

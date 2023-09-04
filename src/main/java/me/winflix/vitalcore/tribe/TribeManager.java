@@ -43,7 +43,7 @@ public class TribeManager {
         tribeCommands.add(new Menu());
         tribeCommands.add(new SetTribeHome());
         tribeCommands.add(new ToTribeHome());
-        tribeCommands.add(new Invite(plugin));
+        tribeCommands.add(new Invite());
         tribeCommands.add(new Kick());
         tribeCommands.add(new Members());
         tribeCommands.add(new Leave());

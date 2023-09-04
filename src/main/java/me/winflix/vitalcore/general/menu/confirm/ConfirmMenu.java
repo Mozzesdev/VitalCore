@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.general.menu;
+package me.winflix.vitalcore.general.menu.confirm;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import dev.dbassett.skullcreator.SkullCreator;
-import me.winflix.vitalcore.general.interfaces.ConfirmMenuMessages;
-import me.winflix.vitalcore.general.interfaces.ConfirmMessages;
+import me.winflix.vitalcore.general.menu.Menu;
+import me.winflix.vitalcore.general.menu.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 
 public class ConfirmMenu extends Menu implements ConfirmMenuMessages {

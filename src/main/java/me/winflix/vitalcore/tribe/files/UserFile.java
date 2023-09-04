@@ -6,20 +6,23 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.files.YmlFile;
 import me.winflix.vitalcore.tribe.models.User;
 
 public class UserFile extends YmlFile {
+
     private User user;
 
-    public UserFile(String path, String folder, User user) {
-        super(path, folder);
+    public UserFile(VitalCore plugin, String fileName, String folder, User user) {
+        super(plugin, fileName, folder);
         this.user = user;
+        create();
     }
 
     @Override
     public void create() {
-        File file = new File(getAllPath());
+        File file = new File(getPath());
 
         if (!file.exists()) {
             if (user != null) {
@@ -32,7 +35,6 @@ public class UserFile extends YmlFile {
             }
         }
 
-        reloadConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
     }
