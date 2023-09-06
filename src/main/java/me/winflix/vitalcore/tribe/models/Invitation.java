@@ -1,6 +1,7 @@
 package me.winflix.vitalcore.tribe.models;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class Invitation {
     private String senderTribeId;
@@ -38,6 +39,31 @@ public class Invitation {
 
     public void setCreatedAt(final Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Invitation [createdAt="
+                + createdAt.getTime()
+                + ", senderTribeId=" + senderTribeId
+                + ", targetUserId=" + targetUserId
+                + "]";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Invitation that = (Invitation) o;
+        return senderTribeId.equals(that.senderTribeId) &&
+                targetUserId.equals(that.targetUserId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(senderTribeId, targetUserId);
     }
 
 }

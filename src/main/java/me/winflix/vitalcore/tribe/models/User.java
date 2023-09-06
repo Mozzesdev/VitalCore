@@ -45,10 +45,10 @@ public class User {
         return invitations;
     }
 
-    public ArrayList<Invitation> removeInvitation(Invitation inv) {
-        invitations.remove(inv);
-        return invitations;
-    } 
+    public boolean removeInvitation(Invitation inv) {
+        boolean removed = invitations.remove(inv);
+        return removed;
+    }
 
     public Tribe getTribe() {
         return tribe;
@@ -76,6 +76,7 @@ public class User {
                 + playerName
                 + ", id=" + id
                 + ", tribeId=" + tribeId
+                + ", invitations=" + invitations
                 + "]";
     }
 

@@ -82,6 +82,11 @@ public class Kick extends SubCommand {
         // Obtener información del miembro objetivo
         TribeMember member = tribeDB.getMember(targetPlayer.getUniqueId());
 
+        if (member == null) {
+            Utils.errorMessage(sender, "Ese jugador no se encuentra en tu tribu.");
+            return;
+        }
+
         // Verificar si el jugador tiene permisos para expulsar al miembro
         if (!senderRange.canKick(member)) {
             Utils.errorMessage(sender, "Solo puedes expulsar a jugadores teniendo un rango superior al expulsado.");

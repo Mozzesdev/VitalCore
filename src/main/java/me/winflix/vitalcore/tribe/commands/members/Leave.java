@@ -89,6 +89,7 @@ public class Leave extends SubCommand {
                     TribeMember newOwner = tribeDB.getDifferentMember(p.getUniqueId());
                     newOwner.setRange(RankManager.OWNER_RANK);
                     tribeDB.replaceMember(UUID.fromString(newOwner.getId()), newOwner);
+                    tribeDB.setTribeName("Tribe_of_" + newOwner.getPlayerName());
                 }
 
                 // Quitar al jugador de la tribu y guardarla
@@ -98,7 +99,6 @@ public class Leave extends SubCommand {
                 // Crear una nueva tribu para el jugador
                 Tribe newTribe = TribesCollection.createTribe(p);
                 playerDB.setTribeId(newTribe.getId());
-                playerDB.setTribe(null);
                 UsersCollection.saveUser(playerDB);
 
                 Utils.successMessage(p, "Has salido correctamente de tu tribu y se creó tu nueva tribu.");

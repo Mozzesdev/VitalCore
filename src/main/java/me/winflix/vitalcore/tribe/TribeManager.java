@@ -10,6 +10,7 @@ import me.winflix.vitalcore.general.commands.SubCommand;
 import me.winflix.vitalcore.tribe.commands.home.SetTribeHome;
 import me.winflix.vitalcore.tribe.commands.home.ToTribeHome;
 import me.winflix.vitalcore.tribe.commands.members.Accept;
+import me.winflix.vitalcore.tribe.commands.members.Cancel;
 import me.winflix.vitalcore.tribe.commands.members.Invite;
 import me.winflix.vitalcore.tribe.commands.members.Kick;
 import me.winflix.vitalcore.tribe.commands.members.Leave;
@@ -50,6 +51,7 @@ public class TribeManager {
         tribeCommands.add(new Leave());
         tribeCommands.add(new Promote());
         tribeCommands.add(new Accept());
+        tribeCommands.add(new Cancel());
     }
 
 }

@@ -1,5 +1,6 @@
 package me.winflix.vitalcore.tribe.commands.members;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class Cancel extends SubCommand {
         placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax());
 
         // Verificar la cantidad de argumentos
-        if (args.length != 2) {
+        if (args.length < 2) {
             String syntaxMessage = messageFile.getString("tribes.commands.syntax");
             String finalMessage = Placeholders.replacePlaceholders(syntaxMessage, placeholders);
             Utils.errorMessage(p, finalMessage);
@@ -68,9 +69,8 @@ public class Cancel extends SubCommand {
         User senderPlayer = UsersCollection.getUserWithTribe(p.getUniqueId());
         placeholders.put(Placeholders.OFF_TARGET_NAME, senderPlayer.getPlayerName());
 
-
         // Obtener el nombre de la tribu
-        String tribeName = args[1];
+        String tribeName = String.join("_", Arrays.copyOfRange(args, 1, args.length));
         placeholders.put(Placeholders.TRIBE_NAME, tribeName);
 
         // Verificar si la tribu existe
@@ -91,18 +91,24 @@ public class Cancel extends SubCommand {
             return;
         }
 
-        // Eliminar la invitación
         Invitation invitation = invitationOptional.get();
 
-        senderPlayer.removeInvitation(invitation);
-        UsersCollection.saveUser(senderPlayer);
-
-        targetTribe.removeInvitation(invitation);
-        TribesCollection.saveTribe(targetTribe);
+        boolean removedFromSender = senderPlayer.removeInvitation(invitation);
+        boolean removedFromTarget = targetTribe.removeInvitation(invitation);
 
         // Mensaje de éxito
         String cancelMessage = messageFile.getString("tribes.invites.options.cancel");
         String finalMessage = Placeholders.replacePlaceholders(cancelMessage, placeholders);
-        Utils.successMessage(p, finalMessage);
+
+        if (removedFromSender && removedFromTarget) {
+            // Ambas eliminaciones fueron exitosas
+            UsersCollection.saveUser(senderPlayer);
+            TribesCollection.saveTribe(targetTribe);
+
+            Utils.successMessage(p, finalMessage);
+        } else {
+            // Al menos una de las eliminaciones falló
+            Utils.errorMessage(p, "Hubo un problema al cancelar la invitación, intentalo de nuevo.");
+        }
     }
 }

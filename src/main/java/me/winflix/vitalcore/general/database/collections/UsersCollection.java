@@ -59,6 +59,7 @@ public class UsersCollection {
     public static User saveUser(User p) {
         // Eliminar el archivo YAML antiguo solo si existe
         UserFile oldFile = VitalCore.fileManager.getUserFile(p.getId());
+        p.setTribe(null);
         if (oldFile.getFile().exists()) {
             oldFile.getFile().delete();
             VitalCore.fileManager.getUsersFiles().remove(oldFile);

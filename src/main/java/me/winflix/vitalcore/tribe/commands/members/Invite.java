@@ -148,10 +148,9 @@ public class Invite extends SubCommand {
         Invitation invitation = new Invitation(senderTribe.getId(), targetUser.getId());
 
         targetUser.addInvitation(invitation);
-        targetUser.setTribe(null);
-        UsersCollection.saveUser(targetUser);
-
         senderTribe.addInvitation(invitation);
+
+        UsersCollection.saveUser(targetUser);
         TribesCollection.saveTribe(senderTribe);
 
         // Enviar mensajes de confirmación y éxito

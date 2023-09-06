@@ -59,6 +59,7 @@ public class TribesCollection {
         tribeModel.addMember(owner);
 
         TribeFile tribeFile = new TribeFile(plugin, tribeId, "tribes", tribeModel);
+
         VitalCore.fileManager.getTribesFiles().add(tribeFile);
 
         tribesCollection.insertOne(tribeModel);
@@ -71,16 +72,19 @@ public class TribesCollection {
     }
 
     public static Tribe getTribeByName(String name) {
-        TribeFile tribeFile = VitalCore.fileManager.getTribesFiles().stream()
-                .filter((file) -> file.getTribe().getTribeName().equalsIgnoreCase(name)).findFirst().orElse(null);
-        return tribeFile != null ? tribeFile.getTribe() : null;
+        return VitalCore.fileManager.getTribesFiles().stream()
+                .map(TribeFile::getTribe)
+                .filter(tribe -> tribe.getTribeName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
     }
 
     public static Tribe saveTribe(Tribe tribe) {
         // Eliminar el archivo YAML antiguo solo si existe
         TribeFile oldFile = VitalCore.fileManager.getTribeFile(tribe.getId());
-        if (oldFile.getFile().exists()) {
-            oldFile.getFile().delete();
+        File yamlFile = oldFile.getFile();
+
+        if (yamlFile.exists() && yamlFile.delete()) {
             VitalCore.fileManager.getTribesFiles().remove(oldFile);
         }
 
@@ -101,13 +105,13 @@ public class TribesCollection {
 
             if (yamlFile.exists() && yamlFile.delete()) {
                 System.out.println("Archivo de tribu eliminado: " + yamlFile.getPath());
+                VitalCore.fileManager.tribeFiles.remove(tribeFile);
             } else {
                 System.out.println("No se pudo eliminar el archivo de tribu: " + yamlFile.getPath());
             }
         } catch (SecurityException e) {
             e.printStackTrace();
         }
-
         tribesCollection.deleteOne(Filters.eq("_id", tribe.getId()));
     }
 

@@ -67,7 +67,7 @@ public class Tribe {
         return description;
     }
 
-    public List<Invitation> getInvitations() {
+    public ArrayList<Invitation> getInvitations() {
         return invitations;
     }
 
@@ -80,10 +80,10 @@ public class Tribe {
         return invitations;
     }
 
-     public ArrayList<Invitation> removeInvitation(Invitation inv) {
-        invitations.remove(inv);
-        return invitations;
-    } 
+    public boolean removeInvitation(Invitation inv) {
+        boolean removed = invitations.remove(inv);
+        return removed;
+    }
 
     public void setDescription(final String des) {
         description = des;
@@ -167,6 +167,7 @@ public class Tribe {
                 + ", members=" + members
                 + ", open=" + open
                 + ", tribeHome=" + tribeHome
+                + ", invitations=" + invitations
                 + "]";
     }
 

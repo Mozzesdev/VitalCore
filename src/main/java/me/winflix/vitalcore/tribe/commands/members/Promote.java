@@ -98,9 +98,13 @@ public class Promote extends SubCommand {
             return;
         }
 
-        // Obtener información del jugador objetivo
-        User targetDB = UsersCollection.getUserWithTribe(target.getUniqueId());
-        Tribe targetTribe = targetDB.getTribe();
+        //Obtener el miembro a promover
+        TribeMember targetMember = senderTribe.getMember(target.getUniqueId());
+
+        if(targetMember == null){
+            Utils.errorMessage(sender, "Ese jugador no se encuentra en tu tribu.");
+            return;
+        }
 
         // Crear mensajes para el menú de confirmación
         String confirmMessage = "&aPromover a " + target.getName();
@@ -124,10 +128,9 @@ public class Promote extends SubCommand {
         // Accion despues de cerrar el menu de confirmacion
         confirmMenu.afterClose((confirmed) -> {
             if (confirmed) {
-                TribeMember targetMember = targetTribe.getMember(target.getUniqueId());
                 targetMember.setRange(rank);
-                targetTribe.replaceMember(target.getUniqueId(), targetMember);
-                TribesCollection.saveTribe(targetTribe);
+                senderTribe.replaceMember(target.getUniqueId(), targetMember);
+                TribesCollection.saveTribe(senderTribe);
                 Utils.successMessage(sender, "Has promovido correctamente a &b" + target.getName());
                 if (target.isOnline()) {
                     Utils.successMessage(target.getPlayer(), "Has sido promovido al rango " + rank.getDisplayName());
