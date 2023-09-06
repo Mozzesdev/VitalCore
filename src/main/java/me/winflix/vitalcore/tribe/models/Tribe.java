@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import me.winflix.vitalcore.tribe.utils.RankManager;
 
-
 public class Tribe {
     String tribeName;
     String description;
@@ -14,6 +13,7 @@ public class Tribe {
     String id;
     String tag;
     boolean open;
+    ArrayList<Invitation> invitations;
     ArrayList<TribeMember> members;
     ArrayList<Rank> ranks;
 
@@ -25,10 +25,11 @@ public class Tribe {
         this.id = id;
         this.tag = "";
         this.description = "";
-        this.members = new ArrayList<TribeMember>();
-        this.open = true;
         this.tribeHome = "";
+        this.open = true;
+        this.members = new ArrayList<TribeMember>();
         this.ranks = new ArrayList<Rank>();
+        this.invitations = new ArrayList<Invitation>();
         setDefaultRanks();
     }
 
@@ -66,6 +67,24 @@ public class Tribe {
         return description;
     }
 
+    public List<Invitation> getInvitations() {
+        return invitations;
+    }
+
+    public void setInvitations(final ArrayList<Invitation> invitations) {
+        this.invitations = invitations;
+    }
+
+    public ArrayList<Invitation> addInvitation(Invitation inv) {
+        invitations.add(inv);
+        return invitations;
+    }
+
+     public ArrayList<Invitation> removeInvitation(Invitation inv) {
+        invitations.remove(inv);
+        return invitations;
+    } 
+
     public void setDescription(final String des) {
         description = des;
     }
@@ -81,7 +100,7 @@ public class Tribe {
                 .orElse(null);
     }
 
-    public TribeMember getDiferentMember(UUID id) {
+    public TribeMember getDifferentMember(UUID id) {
         return getMembers().stream()
                 .filter(tribeMember -> !tribeMember.getId().equals(id.toString()))
                 .findFirst()
@@ -92,7 +111,7 @@ public class Tribe {
         return ranks;
     }
 
-    public void setRanks(ArrayList<Rank> ranks) {
+    public void setRanks(final ArrayList<Rank> ranks) {
         this.ranks = ranks;
     }
 

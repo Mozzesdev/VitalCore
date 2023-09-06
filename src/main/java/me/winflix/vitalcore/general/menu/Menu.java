@@ -9,6 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 
 public abstract class Menu implements InventoryHolder {

@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.menu.Menu;
-import me.winflix.vitalcore.general.menu.PlayerMenuUtility;
+import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 
 import java.lang.reflect.Constructor;

@@ -7,7 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import dev.dbassett.skullcreator.SkullCreator;
 import me.winflix.vitalcore.general.menu.Menu;
-import me.winflix.vitalcore.general.menu.PlayerMenuUtility;
+import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.PlayerUtils;
 import me.winflix.vitalcore.general.utils.Utils;
 

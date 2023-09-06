@@ -10,7 +10,7 @@ import me.winflix.vitalcore.core.VCoreManager;
 import me.winflix.vitalcore.general.database.Database;
 import me.winflix.vitalcore.general.events.MenuEvents;
 import me.winflix.vitalcore.general.files.FileManager;
-import me.winflix.vitalcore.general.menu.PlayerMenuUtility;
+import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.tribe.TribeManager;
 

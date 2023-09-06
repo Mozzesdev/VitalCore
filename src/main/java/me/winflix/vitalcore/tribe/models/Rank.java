@@ -58,6 +58,10 @@ public class Rank {
         this.privilege = privilege;
     }
 
+    public boolean matchesNameOrDisplayName(String nameToMatch) {
+        return name.equalsIgnoreCase(nameToMatch) || displayName.equalsIgnoreCase(nameToMatch);
+    }
+
     @Override
     public String toString() {
         return "PlayerRank [name="

@@ -1,10 +1,13 @@
 package me.winflix.vitalcore.tribe.models;
 
+import java.util.ArrayList;
+
 public class User {
     String playerName;
     String id;
     String tribeId;
     Tribe tribe;
+    ArrayList<Invitation> invitations;
 
     public User() {
     }
@@ -14,6 +17,7 @@ public class User {
         this.playerName = playerName;
         this.id = id;
         this.tribeId = tribeId;
+        this.invitations = new ArrayList<Invitation>();
     }
 
     public String getPlayerName() {
@@ -27,6 +31,24 @@ public class User {
     public String getId() {
         return this.id;
     }
+
+    public ArrayList<Invitation> getInvitations() {
+        return invitations;
+    }
+
+    public void setInvitations(final ArrayList<Invitation> invitations) {
+        this.invitations = invitations;
+    }
+
+    public ArrayList<Invitation> addInvitation(Invitation inv) {
+        invitations.add(inv);
+        return invitations;
+    }
+
+    public ArrayList<Invitation> removeInvitation(Invitation inv) {
+        invitations.remove(inv);
+        return invitations;
+    } 
 
     public Tribe getTribe() {
         return tribe;

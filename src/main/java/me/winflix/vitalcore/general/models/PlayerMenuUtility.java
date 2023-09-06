@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.general.menu;
+package me.winflix.vitalcore.general.models;
 
 import org.bukkit.entity.Player;
 

@@ -10,7 +10,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import me.winflix.vitalcore.general.database.collections.UsersCollection;
 import me.winflix.vitalcore.general.menu.PaginatedMenu;
-import me.winflix.vitalcore.general.menu.PlayerMenuUtility;
+import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.PlayerUtils;
 import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.tribe.models.Tribe;

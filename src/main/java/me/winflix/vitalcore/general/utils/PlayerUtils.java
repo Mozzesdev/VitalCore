@@ -17,17 +17,21 @@ public class PlayerUtils {
 
     @SuppressWarnings("deprecation")
     public static ItemStack getPlayerSkull(String playerName, UUID uuid, String... lore) {
+        // Crear un ItemStack de cabeza de jugador
         ItemStack itemStack = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 
         if (skullMeta != null) {
+            // Establecer el dueño del cráneo y su nombre
             skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
             skullMeta.setDisplayName(Utils.useColors("&r" + playerName));
 
             if (lore != null && lore.length > 0) {
+                // Establecer el lore si está presente
                 skullMeta.setLore(Arrays.asList(lore));
             }
 
+            // Almacenar el UUID en los datos persistentes del cráneo
             NamespacedKey uuidKey = new NamespacedKey(VitalCore.getPlugin(), "uuid");
             skullMeta.getPersistentDataContainer().set(uuidKey, PersistentDataType.STRING, uuid.toString());
 
@@ -38,8 +42,10 @@ public class PlayerUtils {
     }
 
     public static File getPlayerFile(String uuid) {
+        // Obtener la carpeta de datos de los jugadores
         File dataFolder = new File(
                 VitalCore.getPlugin(VitalCore.class).getDataFolder() + File.separator + "players-states");
+
         for (File file : dataFolder.listFiles()) {
             if (file.getName().endsWith(".yml")) {
                 if (file.getName().equalsIgnoreCase(uuid + ".yml")) {
@@ -47,6 +53,7 @@ public class PlayerUtils {
                 }
             }
         }
+
         return null;
     }
 }

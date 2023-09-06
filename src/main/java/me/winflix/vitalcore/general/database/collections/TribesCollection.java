@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.mongodb.MongoClientSettings;
@@ -34,9 +35,19 @@ public class TribesCollection {
         tribesCollection = database.getCollection("Tribes", Tribe.class).withCodecRegistry(pojoCodecRegistry);
     }
 
-    public static Tribe createTribe(Player player) {
-        String playerName = player.getDisplayName();
-        UUID playerUUID = player.getUniqueId();
+    public static Tribe createTribe(Object player) {
+        String playerName = "";
+        UUID playerUUID = new UUID(0, 0);
+
+        if (player instanceof Player) {
+            Player realPlayer = (Player) player;
+            playerName = realPlayer.getDisplayName();
+            playerUUID = realPlayer.getUniqueId();
+        } else if (player instanceof OfflinePlayer) {
+            OfflinePlayer realPlayer = (OfflinePlayer) player;
+            playerName = realPlayer.getName();
+            playerUUID = realPlayer.getUniqueId();
+        }
 
         TribeMember owner = new TribeMember(playerName, playerUUID.toString());
         owner.setRange(RankManager.OWNER_RANK);
@@ -60,7 +71,9 @@ public class TribesCollection {
     }
 
     public static Tribe getTribeByName(String name) {
-        return tribesCollection.find(Filters.eq("tribeName", name)).first();
+        TribeFile tribeFile = VitalCore.fileManager.getTribesFiles().stream()
+                .filter((file) -> file.getTribe().getTribeName().equalsIgnoreCase(name)).findFirst().orElse(null);
+        return tribeFile != null ? tribeFile.getTribe() : null;
     }
 
     public static Tribe saveTribe(Tribe tribe) {

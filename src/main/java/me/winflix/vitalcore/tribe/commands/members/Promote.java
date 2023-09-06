@@ -1,13 +1,15 @@
 package me.winflix.vitalcore.tribe.commands.members;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.commands.SubCommand;
+import me.winflix.vitalcore.general.database.collections.TribesCollection;
 import me.winflix.vitalcore.general.database.collections.UsersCollection;
 import me.winflix.vitalcore.general.menu.confirm.ConfirmMenu;
 import me.winflix.vitalcore.general.menu.confirm.ConfirmMessages;
@@ -50,6 +52,7 @@ public class Promote extends SubCommand {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void perform(Player sender, String[] args) {
         // Validar la cantidad de argumentos
         if (args.length <= 2) {
@@ -57,8 +60,10 @@ public class Promote extends SubCommand {
             return;
         }
 
+        String targetName = args[1];
+
         // Obtener el jugador objetivo
-        Player target = Bukkit.getPlayerExact(args[1]);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
 
         if (target == null) {
             Utils.errorMessage(sender, "El jugador objetivo no está en línea.");
@@ -66,7 +71,7 @@ public class Promote extends SubCommand {
         }
 
         // Validar si el jugador intenta promoverse a sí mismo
-        if (target.getDisplayName().equalsIgnoreCase(sender.getDisplayName())) {
+        if (target.getName().equalsIgnoreCase(sender.getName())) {
             Utils.errorMessage(sender, "No puedes promoverte a ti mismo.");
             return;
         }
@@ -78,12 +83,12 @@ public class Promote extends SubCommand {
 
         // Obtener el rango deseado
         Rank rank = senderTribe.getRanks().stream()
-                .filter((r) -> r.getName().equalsIgnoreCase(args[2]) || r.getDisplayName().equalsIgnoreCase(args[2]))
+                .filter((r) -> r.matchesNameOrDisplayName(args[2]))
                 .findFirst()
                 .orElse(null);
 
         if (rank == null) {
-            Utils.errorMessage(target, "El rango seleccionado no está disponible en tu tribu.");
+            Utils.errorMessage(sender, "El rango seleccionado no está disponible en tu tribu.");
             return;
         }
 
@@ -98,37 +103,41 @@ public class Promote extends SubCommand {
         Tribe targetTribe = targetDB.getTribe();
 
         // Crear mensajes para el menú de confirmación
-        StringBuilder confirmMessage = new StringBuilder();
-        confirmMessage.append("&aPromover a ").append(target.getDisplayName());
+        String confirmMessage = "&aPromover a " + target.getName();
+        List<String> confirmLore = Collections.singletonList("&7Click para promover a " + target.getName() + "!");
 
-        List<String> confirmLore = new ArrayList<>();
-        confirmLore.add("&7Click para promover a" + target.getDisplayName() + "!");
+        String cancelMessage = "&cCancelar promoción";
+        List<String> cancelLore = Collections.singletonList("&7Click para cancelar la promoción!");
 
-        StringBuilder cancelMessage = new StringBuilder();
-        cancelMessage.append("&cCancelar promoción");
+        String titleMenu = "&c¿Deseas Promover a " + target.getName();
 
-        List<String> cancelLore = new ArrayList<>();
-        cancelLore.add("&7Click para cancelar la promoción!");
+        // Instanciar los mensajes
+        ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage, confirmLore, cancelMessage, cancelLore);
 
-        String titleMenu = "&c¿Deseas Promover a " + target.getDisplayName();
+        // Instanciar el menu de confirmacion
+        ConfirmMenu confirmMenu = new ConfirmMenu(
+                VitalCore.getPlayerMenuUtility(sender),
+                VitalCore.fileManager.getMessagesFile().getConfig(),
+                confirmMessages,
+                titleMenu);
 
-        ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage.toString(), confirmLore,
-                cancelMessage.toString(), cancelLore);
-
-        ConfirmMenu confirmMenu = new ConfirmMenu(VitalCore.getPlayerMenuUtility(sender),
-                VitalCore.fileManager.getMessagesFile().getConfig(), confirmMessages, titleMenu);
-
+        // Accion despues de cerrar el menu de confirmacion
         confirmMenu.afterClose((confirmed) -> {
             if (confirmed) {
                 TribeMember targetMember = targetTribe.getMember(target.getUniqueId());
                 targetMember.setRange(rank);
-                Utils.successMessage(sender, "Has promovido correctamente a &b" + target.getDisplayName());
-                Utils.successMessage(target, "Has sido promovido al rango " + rank.getDisplayName());
-                return;
+                targetTribe.replaceMember(target.getUniqueId(), targetMember);
+                TribesCollection.saveTribe(targetTribe);
+                Utils.successMessage(sender, "Has promovido correctamente a &b" + target.getName());
+                if (target.isOnline()) {
+                    Utils.successMessage(target.getPlayer(), "Has sido promovido al rango " + rank.getDisplayName());
+                }
+            } else {
+                Utils.errorMessage(sender, "Has cancelado la promoción de " + target.getName());
             }
-            Utils.errorMessage(sender, "Has cancelado la promoción de " + target.getDisplayName());
         });
 
+        // Abrir el menu de confirmacion
         confirmMenu.open();
     }
 

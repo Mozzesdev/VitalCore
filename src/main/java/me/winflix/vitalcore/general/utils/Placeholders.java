@@ -12,9 +12,9 @@ public class Placeholders {
 
     public final static String TRIBE_RANK = "${tribe:name}";
 
-    public final static String PROMPT_ACCEPT = "${pr:accept}";
+    public final static String CLK_ACCEPT = "${clk:accept}";
 
-    public final static String PROMPT_REJECT = "${pr:reject}";
+    public final static String CLK_REJECT = "${clk:reject}";
 
     public final static String COMMAND_SYNTAX = "${cm:syntax}";
 

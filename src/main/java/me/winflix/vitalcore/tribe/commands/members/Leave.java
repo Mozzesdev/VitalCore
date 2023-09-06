@@ -1,6 +1,6 @@
 package me.winflix.vitalcore.tribe.commands.members;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,49 +52,61 @@ public class Leave extends SubCommand {
 
     @Override
     public void perform(Player p, String[] args) {
+        // Obtener el usuario actual y su tribu
         User playerDB = UsersCollection.getUserWithTribe(p.getUniqueId());
         Tribe tribeDB = playerDB.getTribe();
 
+        // Verificar si el jugador es el único miembro de la tribu
         if (tribeDB.getMembers().size() <= 1) {
-            Utils.errorMessage(p, "No puedes salirte de tu tribu si solo estas tu.");
+            Utils.errorMessage(p, "No puedes salirte de tu tribu si solo estás tú.");
             return;
         }
 
+        // Mensaje de confirmación y cancelación
+        String menuName = "¿Deseas salirte de la tribu?";
         String confirmMessage = "&aInvitar a";
-        List<String> confirmLore = new ArrayList<String>();
-        confirmLore.add("&7Click para invitar a");
-        String cancelMessage = "&cCancelar invitacion";
-        List<String> cancelLore = new ArrayList<String>();
-        cancelLore.add("&7Click para cancelar la invitacion!");
+        List<String> confirmLore = Collections.singletonList("&7Click para invitar a");
+        String cancelMessage = "&cCancelar invitación";
+        List<String> cancelLore = Collections.singletonList("&7Click para cancelar la invitación!");
 
-        ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage, confirmLore, cancelMessage,
-                cancelLore);
+        // Crear mensajes para el menú de confirmación
+        ConfirmMessages confirmMessages = new ConfirmMessages(confirmMessage, confirmLore, cancelMessage, cancelLore);
 
-        ConfirmMenu confirmMenu = new ConfirmMenu(VitalCore.getPlayerMenuUtility(p),
-                VitalCore.fileManager.getMessagesFile().getConfig(), confirmMessages, "");
-        confirmMenu.afterClose((condition) -> {
-            if (condition) {
+        // Crear el menú de confirmación
+        ConfirmMenu confirmMenu = new ConfirmMenu(
+                VitalCore.getPlayerMenuUtility(p),
+                VitalCore.fileManager.getMessagesFile().getConfig(),
+                confirmMessages,
+                menuName);
+
+        // Acción después de cerrar el menú de confirmación
+        confirmMenu.afterClose((confirmed) -> {
+            if (confirmed) {
                 TribeMember member = tribeDB.getMember(p.getUniqueId());
 
+                // Verificar si el jugador es el dueño de la tribu
                 if (member.getRange().getName().equals(RankManager.OWNER_RANK.getName())) {
-                    TribeMember newOwner = tribeDB.getDiferentMember(p.getUniqueId());
+                    TribeMember newOwner = tribeDB.getDifferentMember(p.getUniqueId());
                     newOwner.setRange(RankManager.OWNER_RANK);
                     tribeDB.replaceMember(UUID.fromString(newOwner.getId()), newOwner);
                 }
 
+                // Quitar al jugador de la tribu y guardarla
                 tribeDB.removeMember(member);
                 TribesCollection.saveTribe(tribeDB);
 
-                Tribe t = TribesCollection.createTribe(p);
-                playerDB.setTribeId(t.getId());
+                // Crear una nueva tribu para el jugador
+                Tribe newTribe = TribesCollection.createTribe(p);
+                playerDB.setTribeId(newTribe.getId());
                 playerDB.setTribe(null);
                 UsersCollection.saveUser(playerDB);
 
-                Utils.successMessage(p, "Has salido correctamente de tu tribu y se creo tu nueva tribu.");
+                Utils.successMessage(p, "Has salido correctamente de tu tribu y se creó tu nueva tribu.");
             }
         });
 
+        // Abrir el menú de confirmación
         confirmMenu.open();
-
     }
+
 }

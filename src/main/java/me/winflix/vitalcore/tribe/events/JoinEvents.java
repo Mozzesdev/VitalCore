@@ -25,7 +25,7 @@ public class JoinEvents implements Listener {
     public void PlayerJoinEvent(PlayerJoinEvent event) throws Exception {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        User existPlayer = UsersCollection.getUserWithTribe(uuid);
+        User existPlayer = UsersCollection.getUser(uuid);
 
         if (existPlayer == null) {
             Tribe tribeDocument = TribesCollection.createTribe(player);

@@ -15,13 +15,9 @@ tribes:
         lore:
           - ""
     target:
-      invite: "Has recibido una invitación para unirte a la tribu de ${tribe:name}!"
+      invite: "Has recibido una invitación para unirte a la tribu de ${tribe:name}! &7(${clk:accept} &b|| ${clk:reject}&7)"
       accept: "Has aceptado la invitación a la tribu de ${tribe:name}."
       rejected: "Has rechazado la invitación a la tribu de ${tribe:name}."
-      clickable:
-        message: "Has recibido una invitación para unirte a la tribu de ${tribe:name}! &7(&a${clk:accept} &b|| &c${clk:reject}&7)"
-        accept: "&aAceptar"
-        reject: "&bRechazar"
     off-target:
       invite: "Has enviado una invitación a ${target:name}"
       accept: "${target:name} ha aceptado la invitación a la tribu."
@@ -32,6 +28,7 @@ tribes:
       cant-invite: "No tienes permitido invitar a nuevos miembros."
       offline: "El jugador ${target:name} no esta actualmente en linea."
       self: "No puedes invitarte a ti mismo a tu tribu."
+      cancel: "Has cancelado la invitacion de la tribu de ${tribe:name}"
       exist: "El jugador ${target:name} ya se encuentra actualmente en tu tribu."
   promotes:
     menu:
@@ -72,5 +69,8 @@ tribes:
       description: "This command invite a player to your tribe."
 reload: "Se ha recargado el plugin correctamente"
 general:
+  clk-action:
+    accept: "&aAceptar"
+    reject: "&cRechazar"
   commands:
     unknown: "Comando desconocido o no tienes permisos para ejecutarlo."

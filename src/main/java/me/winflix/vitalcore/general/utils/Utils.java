@@ -23,16 +23,21 @@ public class Utils {
     public static String INFO_PREFIX = "";
 
     public static String useColors(String value) {
-        Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
-        Matcher colorMatcher = pattern.matcher(value);
+        // Aplicar códigos hexadecimales primero
+        Pattern colorPattern = Pattern.compile("#[a-fA-F0-9]{6}");
+        Matcher colorMatcher = colorPattern.matcher(value);
 
         while (colorMatcher.find()) {
             String color = value.substring(colorMatcher.start(), colorMatcher.end());
             value = value.replace(color, ChatColor.of(color) + "");
 
-            colorMatcher = pattern.matcher(value);
+            colorMatcher = colorPattern.matcher(value);
         }
-        return ChatColor.translateAlternateColorCodes('&', value);
+
+        // Aplicar códigos de formato de Minecraft
+        value = ChatColor.translateAlternateColorCodes('&', value);
+
+        return value;
     }
 
     public static void infoMessage(Player p, String message) {
@@ -76,6 +81,41 @@ public class Utils {
             }
         });
         player.spigot().sendMessage(component.create());
+    }
+
+    public static void sendConfirmationClickableMessage(Player target, String message, ClickableMessage confirm,
+            ClickableMessage reject) {
+        ComponentBuilder component = new ComponentBuilder();
+
+        String regex = "(?=&[0-9a-fA-Fk-oK-OrR])";
+        String[] parts = message.split(regex);
+
+        // Realizar los reemplazos de espacios una vez
+        String confirmKeyword = confirm.getMessage().replaceAll(" ", "").toLowerCase();
+        String rejectKeyword = reject.getMessage().replaceAll(" ", "").toLowerCase();
+
+        for (String part : parts) {
+            TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(useColors(part)));
+
+            // Comparar sin distinción entre mayúsculas y minúsculas
+            String partWithoutSpaces = part.replaceAll(" ", "").toLowerCase();
+
+            if (partWithoutSpaces.equals(confirmKeyword)) {
+                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + confirm.getCommand()));
+                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new Text(useColors(confirm.getHoverMessage()))));
+            }
+
+            if (partWithoutSpaces.equals(rejectKeyword)) {
+                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + reject.getCommand()));
+                textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new Text(useColors(reject.getHoverMessage()))));
+            }
+
+            component.append(textComponent);
+        }
+
+        target.spigot().sendMessage(component.create());
     }
 
 }
