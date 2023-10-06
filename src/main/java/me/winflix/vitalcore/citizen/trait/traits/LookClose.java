@@ -1,27 +1,34 @@
-package me.winflix.vitalcore.citizen.utils.trait.traits;
+package me.winflix.vitalcore.citizen.trait.traits;
 
 import me.winflix.vitalcore.citizen.Citizen;
 import me.winflix.vitalcore.citizen.events.NPCLookCloseChangeTargetEvent;
 import me.winflix.vitalcore.citizen.interfaces.Toggleable;
 import me.winflix.vitalcore.citizen.interfaces.Trait;
+import me.winflix.vitalcore.citizen.trait.traits.RotationTrait.PacketRotationSession;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffectType;
 
+import com.google.common.collect.Maps;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @TraitName("lookclose")
 public class LookClose extends Trait implements Toggleable {
 
-    private double range = 10.0;
+    private double range = 10;
     private Player lookingAt;
-    private boolean enabled = false;
+    private boolean enabled = true;
+    private final Map<UUID, PacketRotationSession> sessions = Maps.newHashMapWithExpectedSize(4);
+    private boolean realisticLooking = false;
 
     public LookClose() {
         super("lookclose");
@@ -30,8 +37,9 @@ public class LookClose extends Trait implements Toggleable {
     private boolean canSee(Player player) {
         if (player == null || !player.isValid())
             return false;
-        return !(npc.getEntity() instanceof LivingEntity) ||
-                ((LivingEntity) npc.getEntity()).hasLineOfSight(player);
+        return realisticLooking && npc.getEntity() instanceof LivingEntity
+                ? ((LivingEntity) npc.getEntity()).hasLineOfSight(player)
+                : true;
     }
 
     public boolean canSeeTarget() {
@@ -39,6 +47,13 @@ public class LookClose extends Trait implements Toggleable {
     }
 
     public void findNewTarget() {
+        if (sessions.size() > 0) {
+            for (PacketRotationSession session : sessions.values()) {
+                session.end();
+            }
+            sessions.clear();
+        }
+
         if (lookingAt != null && !isValid(lookingAt)) {
             NPCLookCloseChangeTargetEvent event = new NPCLookCloseChangeTargetEvent(npc, lookingAt, null);
             Bukkit.getPluginManager().callEvent(event);
@@ -54,18 +69,22 @@ public class LookClose extends Trait implements Toggleable {
         double min = Double.MAX_VALUE;
         Location npcLoc = npc.getLocation();
         for (Player player : getNearbyPlayers()) {
-            double dist = player.getLocation().distance(npcLoc);
-            if (dist > min)
-                continue;
-            min = dist;
-            lookingAt = player;
+            double distance = player.getLocation().distanceSquared(npcLoc);
+
+            if (distance < min) {
+                min = distance;
+                lookingAt = player;
+            }
         }
-        NPCLookCloseChangeTargetEvent event = new NPCLookCloseChangeTargetEvent(npc, old, lookingAt);
-        Bukkit.getPluginManager().callEvent(event);
-        if (lookingAt != event.getNewTarget() && event.getNewTarget() != null && !isValid(event.getNewTarget())) {
-            return;
+
+        if (old != lookingAt) {
+            NPCLookCloseChangeTargetEvent event = new NPCLookCloseChangeTargetEvent(npc, old, lookingAt);
+            Bukkit.getPluginManager().callEvent(event);
+            if (lookingAt != event.getNewTarget() && event.getNewTarget() != null && !isValid(event.getNewTarget())) {
+                return;
+            }
+            lookingAt = event.getNewTarget();
         }
-        lookingAt = event.getNewTarget();
     }
 
     private List<Player> getNearbyPlayers() {

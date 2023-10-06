@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public class Skin {
 
-    private UUID playerUUID; // UUID del jugador
-    private String skinURL; // URL de la skin
+    private UUID playerUUID; // UUID of user
+    private String skinURL; // URL of the skin
 
     public Skin() {
     }
@@ -23,7 +23,7 @@ public class Skin {
         return skinURL;
     }
 
-    public void setSkinURL(String skinURL) {
+    public void setSkinURL(final String skinURL) {
         this.skinURL = skinURL;
     }
 

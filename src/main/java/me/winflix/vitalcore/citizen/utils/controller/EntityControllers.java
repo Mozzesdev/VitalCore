@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils;
+package me.winflix.vitalcore.citizen.utils.controller;
 
 import com.google.common.base.Throwables;
 import me.winflix.vitalcore.citizen.interfaces.EntityController;

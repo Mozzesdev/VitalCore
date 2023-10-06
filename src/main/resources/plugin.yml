@@ -2,7 +2,7 @@ name: VitalCore
 main: me.winflix.vitalcore.VitalCore
 version: ${project.version}
 api-version: 1.19
-authors: [WinFlix]
+authors: [ WinFlix ]
 description: Core of OverWild
 commands:
   tribe:
@@ -18,3 +18,7 @@ commands:
     aliases:
       - vitalcore
       - vr
+  npc:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:

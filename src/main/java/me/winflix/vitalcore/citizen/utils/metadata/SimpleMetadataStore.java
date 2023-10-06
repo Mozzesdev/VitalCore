@@ -2,7 +2,7 @@ package me.winflix.vitalcore.citizen.utils.metadata;
 
 import com.google.common.base.Preconditions;
 import me.winflix.vitalcore.citizen.interfaces.DataKey;
-import me.winflix.vitalcore.citizen.interfaces.MetadataStore;
+import me.winflix.vitalcore.citizen.models.NPC;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class SimpleMetadataStore implements MetadataStore {
     private final Map<String, MetadataObject> metadata = new HashMap<>();
-    private final Map<Metadata, MetadataObject> npcMetadata = new EnumMap<>(Metadata.class);
+    private final Map<NPC.Metadata, MetadataObject> npcMetadata = new EnumMap<>(NPC.Metadata.class);
 
     private void checkPrimitive(Object data) {
         Preconditions.checkNotNull(data, "data cannot be null");
@@ -20,23 +20,27 @@ public class SimpleMetadataStore implements MetadataStore {
         }
     }
 
+    @Override
     public MetadataStore clone() {
-        MetadataStore copy = new SimpleMetadataStore();
+        SimpleMetadataStore copy = new SimpleMetadataStore();
         copy.metadata.putAll(metadata);
         return copy;
     }
 
-    public <T> T get(Metadata key) {
+    @Override
+    public <T> T get(NPC.Metadata key) {
         Preconditions.checkNotNull(key, "key cannot be null");
         MetadataObject normal = this.npcMetadata.get(key);
         return normal == null ? null : (T) normal.value;
     }
 
-    public <T> T get(Metadata key, T def) {
+    @Override
+    public <T> T get(NPC.Metadata key, T def) {
         T t = get(key);
         return t == null ? def : t;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
         Preconditions.checkNotNull(key, "key cannot be null");
@@ -44,6 +48,7 @@ public class SimpleMetadataStore implements MetadataStore {
         return normal == null ? null : (T) normal.value;
     }
 
+    @Override
     public <T> T get(String key, T def) {
         T t = get(key);
         if (t == null) {
@@ -52,38 +57,43 @@ public class SimpleMetadataStore implements MetadataStore {
         return t;
     }
 
-    public boolean has(Metadata key) {
+    @Override
+    public boolean has(NPC.Metadata key) {
         Preconditions.checkNotNull(key, "key cannot be null");
         return this.npcMetadata.containsKey(key);
     }
 
+    @Override
     public boolean has(String key) {
         Preconditions.checkNotNull(key, "key cannot be null");
         return metadata.containsKey(key);
     }
 
+    @Override
     public void loadFrom(DataKey key) {
         metadata.entrySet().removeIf(e -> e.getValue().persistent);
         npcMetadata.entrySet().removeIf(e -> e.getValue().persistent);
         for (DataKey sub : key.getSubKeys()) {
-            Metadata meta = Metadata.byKey(sub.name());
+            NPC.Metadata meta = NPC.Metadata.byKey(sub.name());
             if (meta != null) {
                 setPersistent(String.valueOf(meta), sub.getRaw(""));
             } else {
                 setPersistent(sub.name(), sub.getRaw(""));
             }
         }
-
     }
 
-    public void remove(Metadata key) {
+    @Override
+    public void remove(NPC.Metadata key) {
         npcMetadata.remove(key);
     }
 
+    @Override
     public void remove(String key) {
         metadata.remove(key);
     }
 
+    @Override
     public void saveTo(DataKey key) {
         Preconditions.checkNotNull(key, "key cannot be null");
         for (Map.Entry<String, MetadataObject> entry : metadata.entrySet()) {
@@ -92,14 +102,15 @@ public class SimpleMetadataStore implements MetadataStore {
             }
         }
 
-        for (Map.Entry<Metadata, MetadataObject> entry : npcMetadata.entrySet()) {
+        for (Map.Entry<NPC.Metadata, MetadataObject> entry : npcMetadata.entrySet()) {
             if (entry.getValue().persistent) {
                 key.setRaw(entry.getKey().getKey(), entry.getValue().value);
             }
         }
     }
 
-    public void set(Metadata key, Object data) {
+    @Override
+    public void set(NPC.Metadata key, Object data) {
         Preconditions.checkNotNull(key, "key cannot be null");
         if (data == null) {
             this.remove(key);
@@ -109,6 +120,7 @@ public class SimpleMetadataStore implements MetadataStore {
 
     }
 
+    @Override
     public void set(String key, Object data) {
         Preconditions.checkNotNull(key, "key cannot be null");
         if (data == null) {
@@ -119,7 +131,8 @@ public class SimpleMetadataStore implements MetadataStore {
 
     }
 
-    public void setPersistent(Metadata key, Object data) {
+    @Override
+    public void setPersistent(NPC.Metadata key, Object data) {
         Preconditions.checkNotNull(key, "key cannot be null");
         if (data == null) {
             this.remove(key);
@@ -129,6 +142,7 @@ public class SimpleMetadataStore implements MetadataStore {
         }
     }
 
+    @Override
     public void setPersistent(String key, Object data) {
         Preconditions.checkNotNull(key, "key cannot be null");
         if (data == null) {
@@ -139,6 +153,7 @@ public class SimpleMetadataStore implements MetadataStore {
         }
     }
 
+    @Override
     public int size() {
         return this.metadata.size() + this.npcMetadata.size();
     }

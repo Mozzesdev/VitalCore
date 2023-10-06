@@ -1,24 +1,22 @@
-package me.winflix.vitalcore.npc.tasks;
+package me.winflix.vitalcore.citizen.tasks;
 
 import me.winflix.vitalcore.VitalCore;
+import me.winflix.vitalcore.citizen.models.DeathBody;
 import me.winflix.vitalcore.general.utils.Utils;
-import me.winflix.vitalcore.npc.Citizen;
-import me.winflix.vitalcore.npc.managers.BodyManager;
-import me.winflix.vitalcore.npc.models.Body;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import me.winflix.vitalcore.citizen.Citizen;
+import me.winflix.vitalcore.citizen.utils.managers.BodyManager;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
 
 public class BodyRemoverTask extends BukkitRunnable {
 
@@ -29,52 +27,68 @@ public class BodyRemoverTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Iterator<Body> bodyIterator = bodyManger.getBodies().iterator();
+        Iterator<DeathBody> bodyIterator = bodyManger.getBodies().iterator();
 
         while (bodyIterator.hasNext()) {
-            Body body = bodyIterator.next();
+            DeathBody deathBody = bodyIterator.next();
 
             long currentTime = System.currentTimeMillis();
 
-            if ((currentTime - body.getWhenDied()) >= 20000) {
+            if ((currentTime - deathBody.getWhenDied()) >= 30000 || deathBody.getInventory().isEmpty()) {
                 bodyIterator.remove();
+
+                deathBody.getItemsTaken().keySet().forEach(uuid -> {
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player != null) {
+                        if (Objects.equals(player.getOpenInventory().getInventory(1), deathBody.getInventory())) {
+                            Bukkit.getScheduler().runTask(VitalCore.getPlugin(), player::closeInventory);
+                        }
+                    }
+                });
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
 
-                        Location location = body.getNpc().getBukkitEntity().getLocation();
+                        Location location = deathBody.getNpc().getBukkitEntity().getLocation();
 
                         Bukkit.getOnlinePlayers().forEach(player -> {
                             ServerGamePacketListenerImpl packetListener = ((CraftPlayer) player).getHandle().connection;
-                            body.getNpc().setPos(location.getX(), location.getY() - 0.01, location.getZ());
-                            packetListener.send(new ClientboundTeleportEntityPacket(body.getNpc()));
+                            deathBody.getNpc().setPos(location.getX(), location.getY() - 0.1, location.getZ());
+                            packetListener.send(new ClientboundTeleportEntityPacket(deathBody.getNpc()));
                         });
 
-                        if (!location.add(0, 0.5, 0).getBlock().isPassable()){
-                            bodyManger.removeBody(body);
-                            Objects.requireNonNull(location.getWorld()).spawnParticle(Particle.SMOKE_NORMAL, location.subtract(1, 0,0), 50, 0.2f, 0.2f, 0.2f, 0.1);
+                        if (!location.add(0, 0.5, 0).getBlock().isPassable()) {
+                            bodyManger.removeBody(deathBody);
+                            Objects.requireNonNull(location.getWorld())
+                                    .spawnParticle(Particle.SMOKE_NORMAL, location.subtract(1, 0, 0), 50, 0.2f, 0.2f,
+                                            0.2f, 0.1);
                             this.cancel();
                         }
 
                     }
-                }.runTaskTimerAsynchronously(VitalCore.getPlugin(), 0L, 5L);
+                }.runTaskTimerAsynchronously(VitalCore.getPlugin(), 0L, 1L);
 
-                Player playerWhoDied = Bukkit.getPlayer(body.getWhoDied());
+                Player playerWhoDied = Bukkit.getPlayer(deathBody.getWhoDied());
 
-                if (playerWhoDied != null) {
-                    Utils.errorMessage(playerWhoDied, "Your body was not reclaimed, all your stuffs was dropped on the floor.");
+                Location dropLocation = deathBody.getNpc().getBukkitEntity().getLocation();
+                List<ItemStack> itemsToDrop = new ArrayList<>(Arrays.asList(deathBody.getInventory().getStorageContents()));
 
-                    Location dropLocation = body.getNpc().getBukkitEntity().getLocation();
-                    Arrays.stream(body.getInventoryItems()).forEach(itemStack -> {
+                for (ItemStack itemStack : itemsToDrop) {
+                    if (itemStack != null && !itemStack.getType().equals(Material.AIR)) {
                         Bukkit.getScheduler().runTask(VitalCore.getPlugin(), () -> {
                             Objects.requireNonNull(dropLocation.getWorld()).dropItem(dropLocation, itemStack);
                         });
-                    });
-
+                    }
                 }
 
+                if (playerWhoDied != null && !deathBody.getInventory().isEmpty()) {
+                    deathBody.getInventory().clear();
+                    Utils.errorMessage(playerWhoDied,
+                            "Your deathBody was not reclaimed, all your stuffs was dropped on the floor.");
+                }
             }
+
         }
     }
 }

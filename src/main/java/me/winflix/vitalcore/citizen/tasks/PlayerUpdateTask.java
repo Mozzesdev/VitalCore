@@ -2,7 +2,7 @@ package me.winflix.vitalcore.citizen.tasks;
 
 import me.winflix.vitalcore.citizen.interfaces.NPCHolder;
 import me.winflix.vitalcore.citizen.models.NPC;
-import me.winflix.vitalcore.citizen.utils.trait.traits.PacketHandlerNPC;
+import me.winflix.vitalcore.citizen.trait.traits.PacketHandlerNPC;
 import me.winflix.vitalcore.core.nms.NMS;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;

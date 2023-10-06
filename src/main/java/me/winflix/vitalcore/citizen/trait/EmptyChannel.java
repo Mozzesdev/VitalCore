@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils.trait;
+package me.winflix.vitalcore.citizen.trait;
 
 import io.netty.channel.*;
 

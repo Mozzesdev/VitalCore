@@ -20,7 +20,7 @@ import me.winflix.vitalcore.tribe.commands.menus.Menu;
 import me.winflix.vitalcore.tribe.events.JoinEvents;
 import me.winflix.vitalcore.tribe.menu.TribeMenu;
 
-public class TribeManager {
+public class Tribe {
 
     private final ArrayList<SubCommand> tribeCommands = new ArrayList<>();
     VitalCore plugin = VitalCore.getPlugin();
@@ -31,7 +31,7 @@ public class TribeManager {
     }
 
     public void setupEvents() {
-        plugin.getServer().getPluginManager().registerEvents(new JoinEvents(plugin), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new JoinEvents(), plugin);
     }
 
     public void setupCommands() {

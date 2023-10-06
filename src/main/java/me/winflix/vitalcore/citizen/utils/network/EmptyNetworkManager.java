@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils;
+package me.winflix.vitalcore.citizen.utils.network;
 
 import me.winflix.vitalcore.core.nms.NMS;
 import net.minecraft.network.Connection;

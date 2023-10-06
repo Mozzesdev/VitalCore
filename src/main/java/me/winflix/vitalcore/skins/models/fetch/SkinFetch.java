@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.skins.models.Fetching;
+package me.winflix.vitalcore.skins.models.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

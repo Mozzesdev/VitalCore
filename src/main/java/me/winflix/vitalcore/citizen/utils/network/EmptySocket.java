@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils;
+package me.winflix.vitalcore.citizen.utils.network;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

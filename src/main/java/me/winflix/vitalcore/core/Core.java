@@ -9,7 +9,7 @@ import me.winflix.vitalcore.core.commands.Reload;
 import me.winflix.vitalcore.general.commands.CommandManager;
 import me.winflix.vitalcore.general.commands.SubCommand;
 
-public class VCoreManager {
+public class Core {
     VitalCore plugin = VitalCore.getPlugin();
     private ArrayList<SubCommand> vCoreCommands = new ArrayList<SubCommand>();
 

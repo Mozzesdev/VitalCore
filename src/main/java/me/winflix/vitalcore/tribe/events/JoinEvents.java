@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.database.collections.TribesCollection;
 import me.winflix.vitalcore.general.database.collections.UsersCollection;
 import me.winflix.vitalcore.tribe.models.Tribe;
@@ -15,14 +14,8 @@ import me.winflix.vitalcore.tribe.models.User;
 
 public class JoinEvents implements Listener {
 
-    VitalCore plugin;
-
-    public JoinEvents(VitalCore plugin) {
-        this.plugin = plugin;
-    }
-
     @EventHandler
-    public void PlayerJoinEvent(PlayerJoinEvent event) throws Exception {
+    public void PlayerJoinEvent(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         User existPlayer = UsersCollection.getUser(uuid);

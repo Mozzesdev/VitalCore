@@ -1,32 +1,28 @@
 package me.winflix.vitalcore.citizen.models;
 
 import net.minecraft.server.level.ServerPlayer;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Player;
+import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 
-public class Body {
+public class DeathBody {
     private ServerPlayer npc;
     private UUID whoDied;
     private Inventory inventory;
     private long whenDied;
-    private List<ArmorStand> armorStandList;
     private Map<UUID, List<ItemStack>> itemsTaken;
+    private Location location;
 
-    public Body() {
-        this.armorStandList = new ArrayList<>();
+    public DeathBody() {
         this.itemsTaken = new HashMap<>();
     }
 
-    public Body(ServerPlayer npc, UUID whoDied, Inventory inventory, long whenDied) {
+    public DeathBody(ServerPlayer npc, UUID whoDied, Inventory inventory, long whenDied) {
         this.npc = npc;
         this.whoDied = whoDied;
         this.inventory = inventory;
@@ -65,20 +61,25 @@ public class Body {
         this.whenDied = whenDied;
     }
 
-    public List<ArmorStand> getArmorStandList() {
-        return armorStandList;
-    }
-
     public Map<UUID, List<ItemStack>> getItemsTaken() {
         return itemsTaken;
     }
 
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     @Override
     public String toString() {
-        return "Body{" +
+        return "DeathBody{" +
                 "npc=" + npc +
                 ", whoDied=" + whoDied +
                 ", whenDied=" + whenDied +
                 '}';
     }
+
 }

@@ -1,2 +1,6 @@
-package me.winflix.vitalcore.citizen.enums;public class RemoveReason {
+package me.winflix.vitalcore.citizen.enums;
+
+public enum RemoveReason {
+    DESTROYED,
+    REMOVAL;
 }

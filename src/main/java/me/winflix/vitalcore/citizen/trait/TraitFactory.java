@@ -1,10 +1,15 @@
-package me.winflix.vitalcore.citizen.utils.trait;
+package me.winflix.vitalcore.citizen.trait;
 
 import com.google.common.base.Preconditions;
+
+import me.winflix.vitalcore.citizen.interfaces.CurrentLocation;
+import me.winflix.vitalcore.citizen.interfaces.Spawned;
 import me.winflix.vitalcore.citizen.interfaces.Trait;
 import me.winflix.vitalcore.citizen.models.NPC;
-import me.winflix.vitalcore.citizen.utils.trait.traits.LookClose;
-import me.winflix.vitalcore.citizen.utils.trait.traits.TraitInfo;
+import me.winflix.vitalcore.citizen.trait.traits.LookClose;
+import me.winflix.vitalcore.citizen.trait.traits.MobTrait;
+import me.winflix.vitalcore.citizen.trait.traits.RotationTrait;
+import me.winflix.vitalcore.citizen.trait.traits.TraitInfo;
 
 import java.util.*;
 
@@ -12,8 +17,12 @@ public class TraitFactory {
     private final List<TraitInfo> defaultTraits = new ArrayList<>();
     private final Map<String, TraitInfo> registered = new HashMap<>();
 
-    public TraitFactory(){
+    public TraitFactory() {
         registerTrait(TraitInfo.create(LookClose.class).asDefaultTrait());
+        registerTrait(TraitInfo.create(MobTrait.class).asDefaultTrait());
+        registerTrait(TraitInfo.create(CurrentLocation.class));
+        registerTrait(TraitInfo.create(Spawned.class));
+        registerTrait(TraitInfo.create(RotationTrait.class));
     }
 
     public void addDefaultTraits(NPC npc) {

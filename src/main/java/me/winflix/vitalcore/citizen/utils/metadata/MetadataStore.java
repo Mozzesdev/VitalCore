@@ -1,15 +1,16 @@
-package me.winflix.vitalcore.citizen.interfaces;
+package me.winflix.vitalcore.citizen.utils.metadata;
 
-import me.winflix.vitalcore.citizen.utils.metadata.Metadata;
+import me.winflix.vitalcore.citizen.interfaces.DataKey;
+import me.winflix.vitalcore.citizen.models.NPC;
 
 public interface MetadataStore {
     MetadataStore clone();
 
-    default <T> T get(Metadata key) {
+    default <T> T get(NPC.Metadata key) {
         return get(key.getKey());
     }
 
-    default <T> T get(Metadata key, T def) {
+    default <T> T get(NPC.Metadata key, T def) {
         return get(key.getKey(), def);
     }
 
@@ -17,7 +18,7 @@ public interface MetadataStore {
 
     <T> T get(String key, T def);
 
-    default boolean has(Metadata key) {
+    default boolean has(NPC.Metadata key) {
         return has(key.getKey());
     }
 
@@ -25,7 +26,7 @@ public interface MetadataStore {
 
     void loadFrom(DataKey key);
 
-    default void remove(Metadata distance) {
+    default void remove(NPC.Metadata distance) {
         remove(distance.getKey());
     }
 
@@ -33,13 +34,13 @@ public interface MetadataStore {
 
     void saveTo(DataKey key);
 
-    default void set(Metadata key, Object data) {
+    default void set(NPC.Metadata key, Object data) {
         set(key.getKey(), data);
     }
 
     void set(String key, Object data);
 
-    default void setPersistent(Metadata key, Object data) {
+    default void setPersistent(NPC.Metadata key, Object data) {
         setPersistent(key.getKey(), data);
     }
 

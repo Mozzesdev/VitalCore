@@ -1,5 +1,7 @@
 package me.winflix.vitalcore.tribe.models;
 
+import me.winflix.vitalcore.skins.models.Skin;
+
 import java.util.ArrayList;
 
 public class User {
@@ -8,12 +10,13 @@ public class User {
     String tribeId;
     Tribe tribe;
     ArrayList<Invitation> invitations;
+    Skin skin;
 
     public User() {
     }
 
     public User(final String playerName, final String id,
-            final String tribeId) {
+                final String tribeId) {
         this.playerName = playerName;
         this.id = id;
         this.tribeId = tribeId;
@@ -40,14 +43,12 @@ public class User {
         this.invitations = invitations;
     }
 
-    public ArrayList<Invitation> addInvitation(Invitation inv) {
-        invitations.add(inv);
-        return invitations;
+    public boolean addInvitation(Invitation inv) {
+        return invitations.add(inv);
     }
 
     public boolean removeInvitation(Invitation inv) {
-        boolean removed = invitations.remove(inv);
-        return removed;
+        return invitations.remove(inv);
     }
 
     public Tribe getTribe() {
@@ -68,6 +69,14 @@ public class User {
 
     public void setTribeId(final String id) {
         this.tribeId = id;
+    }
+
+    public Skin getSkin() {
+        return skin;
+    }
+
+    public void setSkin(final Skin skin) {
+        this.skin = skin;
     }
 
     @Override

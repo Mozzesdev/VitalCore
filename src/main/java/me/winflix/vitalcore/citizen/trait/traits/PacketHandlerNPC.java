@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils.trait.traits;
+package me.winflix.vitalcore.citizen.trait.traits;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.citizen.Citizen;

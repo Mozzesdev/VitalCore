@@ -1,54 +1,62 @@
 package me.winflix.vitalcore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
+import me.winflix.vitalcore.citizen.Citizen;
+import me.winflix.vitalcore.skins.Skins;
+import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.winflix.vitalcore.core.VCoreManager;
+import me.winflix.vitalcore.core.Core;
 import me.winflix.vitalcore.general.database.Database;
 import me.winflix.vitalcore.general.events.MenuEvents;
 import me.winflix.vitalcore.general.files.FileManager;
 import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
-import me.winflix.vitalcore.tribe.TribeManager;
+import me.winflix.vitalcore.tribe.Tribe;
 
-public class VitalCore extends JavaPlugin {
-  public static final Logger Log = Logger.getLogger("VitalCore");
-  private static VitalCore plugin;
-  public static FileManager fileManager;
-  private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
-  
-  @Override
-  public void onEnable() {
-    plugin = this;
+public class VitalCore extends JavaPlugin  {
+    public static final Logger Log = Logger.getLogger("VitalCore");
+    private static VitalCore plugin;
+    public static FileManager fileManager;
+    private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
 
-    new TribeManager().initialize();
-    new VCoreManager().initialize();
-    registerGeneralEvents();
+    @Override
+    public void onEnable() {
+        plugin = this;
 
-    Database.connect();
-    fileManager = new FileManager(plugin);
+        new Tribe().initialize();
+        new Core().initialize();
+        new Skins().initialize();
+        new Citizen().initialize();
 
-    Log.info(Utils.useColors("&ahas been enabled"));
-  }
+        registerGeneralEvents();
 
-  @Override
-  public void onDisable() {
-    Log.info(Utils.useColors("&chas been disabled"));
-  }
+        Database.connect();
+        fileManager = new FileManager(plugin);
 
-  public static VitalCore getPlugin() {
-    return plugin;
-  }
+        Log.info(Utils.useColors("&ahas been enabled"));
+    }
 
-  public static PlayerMenuUtility getPlayerMenuUtility(Player p) {
-    return playerMenuUtilityMap.computeIfAbsent(p, key -> new PlayerMenuUtility(key));
-  }
+    @Override
+    public void onDisable() {
+        Log.info(Utils.useColors("&chas been disabled"));
+    }
 
-  private void registerGeneralEvents() {
-    getServer().getPluginManager().registerEvents(new MenuEvents(), this);
-  }
+    public static VitalCore getPlugin() {
+        return plugin;
+    }
+
+    public static PlayerMenuUtility getPlayerMenuUtility(Player p) {
+        return playerMenuUtilityMap.computeIfAbsent(p, PlayerMenuUtility::new);
+    }
+
+    private void registerGeneralEvents() {
+        getServer().getPluginManager().registerEvents(new MenuEvents(), this);
+    }
 
 }

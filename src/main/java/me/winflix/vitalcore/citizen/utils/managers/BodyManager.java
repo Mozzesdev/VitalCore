@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.managers;
+package me.winflix.vitalcore.citizen.utils.managers;
 
 import me.winflix.vitalcore.citizen.models.DeathBody;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;

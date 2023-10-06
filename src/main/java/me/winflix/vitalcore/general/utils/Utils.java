@@ -61,6 +61,17 @@ public class Utils {
         p.sendMessage(useColors(messageFormat));
     }
 
+    public static String formatUUIDString(String uuidString) {
+        if (uuidString.length() == 32) {
+            return uuidString.substring(0, 8) + "-" +
+                    uuidString.substring(8, 12) + "-" +
+                    uuidString.substring(12, 16) + "-" +
+                    uuidString.substring(16, 20) + "-" +
+                    uuidString.substring(20);
+        }
+        return uuidString;
+    }
+
     public static void sendClickableAction(Player player, ClickableMessage... message) {
         List<ClickableMessage> messageList = Arrays.asList(message);
         ComponentBuilder component = new ComponentBuilder();

@@ -1,5 +1,6 @@
-package me.winflix.vitalcore.citizen.events;
+package me.winflix.vitalcore.citizen.events.abstracts;
 
+import me.winflix.vitalcore.citizen.events.abstracts.NPCEvent;
 import me.winflix.vitalcore.citizen.interfaces.Trait;
 import me.winflix.vitalcore.citizen.models.NPC;
 

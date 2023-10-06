@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.events;
+package me.winflix.vitalcore.citizen.events.abstracts;
 
 import me.winflix.vitalcore.citizen.models.NPC;
 import org.bukkit.event.Event;

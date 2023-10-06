@@ -1,5 +1,6 @@
-package me.winflix.vitalcore.citizen.utils;
+package me.winflix.vitalcore.citizen.interfaces;
 
+import me.winflix.vitalcore.core.nms.NMS;
 import org.bukkit.entity.Player;
 
 import java.util.*;

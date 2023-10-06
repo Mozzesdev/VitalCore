@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils.trait.traits;
+package me.winflix.vitalcore.citizen.trait.traits;
 
 import com.google.common.collect.Iterables;
 import me.winflix.vitalcore.citizen.interfaces.DataKey;

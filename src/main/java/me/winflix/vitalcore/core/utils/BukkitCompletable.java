@@ -1,6 +1,5 @@
-package me.winflix.vitalcore.citizen.utils;
+package me.winflix.vitalcore.core.utils;
 
-import me.winflix.vitalcore.citizen.models.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Consumer;

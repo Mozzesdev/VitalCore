@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.citizen.utils.trait.traits;
+package me.winflix.vitalcore.citizen.trait.traits;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

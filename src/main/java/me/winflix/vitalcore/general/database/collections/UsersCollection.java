@@ -43,10 +43,9 @@ public class UsersCollection {
     public static User createUser(Player player, UUID uuid, Tribe tribe) {
         String playerId = uuid.toString();
         String playerDisplayName = player.getDisplayName();
-        String playerFileName = playerId;
 
         User playerModel = new User(playerDisplayName, playerId, tribe.getId());
-        UserFile playerFile = new UserFile(plugin, playerFileName, "users", playerModel);
+        UserFile playerFile = new UserFile(plugin, playerId, "users", playerModel);
 
         VitalCore.fileManager.getUsersFiles().add(playerFile); // Agregar a la lista de archivos
 
