@@ -22,7 +22,7 @@ import me.winflix.vitalcore.tribe.menu.TribeMenu;
 
 public class TribeManager {
 
-    private ArrayList<SubCommand> tribeCommands = new ArrayList<SubCommand>();
+    private final ArrayList<SubCommand> tribeCommands = new ArrayList<>();
     VitalCore plugin = VitalCore.getPlugin();
 
     public void initialize() {
@@ -38,6 +38,7 @@ public class TribeManager {
         registerCommands();
         PluginCommand tribeCommand = plugin.getCommand("tribe");
         CommandManager tribeCommandManager = new CommandManager(plugin, tribeCommands, TribeMenu.class);
+        assert tribeCommand != null;
         tribeCommand.setExecutor(tribeCommandManager);
     }
 
