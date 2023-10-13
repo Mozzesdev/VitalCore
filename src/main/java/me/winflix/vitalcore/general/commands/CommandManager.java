@@ -31,6 +31,10 @@ public class CommandManager implements TabExecutor {
         this.menu = menu;
     }
 
+    public CommandManager(VitalCore plugin, ArrayList<SubCommand> commands) {
+        this(plugin, commands, null);
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
