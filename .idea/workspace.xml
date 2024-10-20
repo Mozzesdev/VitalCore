@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="43f22d86-4c6e-4b45-9f7a-a8046464f855" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/Residents.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/Residents.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/commands/Create.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/commands/Create.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/entities/PlayerEntityNPC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/entities/PlayerEntityNPC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/entities/controllers/PlayerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/entities/controllers/PlayerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/interfaces/NPC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/interfaces/NPC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/models/ResidentNPC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/models/ResidentNPC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/trait/TraitManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/trait/TraitManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/metadata/SimpleMetadataStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/metadata/SimpleMetadataStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/nms/NMS.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/nms/NMS.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/nms/Reflection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/residents/utils/nms/Reflection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/skins/events/JoinListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/skins/events/JoinListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/skins/utils/SkinGrabber.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/skins/utils/SkinGrabber.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+        <option value="Interface" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$MAVEN_REPOSITORY$/org/spigotmc/spigot/1.20.1-R0.1-SNAPSHOT/spigot-1.20.1-R0.1-SNAPSHOT-remapped-mojang.jar!/net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket.class" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/pom.xml" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/citizen/interfaces/NPC.java" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/src/main/java/me/winflix/vitalcore/skins/utils/SkinGrabber.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="JsBowerSettings">
+    <bower-package value="" />
+    <bower.json value="" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2V6Yldppf0mfaimvdONdI52ZgmR" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;citizen/own&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Plugins/VitalCore&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.Java&quot;,
+    &quot;settings.editor.splitter.proportion&quot;: &quot;0.2513863&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="43f22d86-4c6e-4b45-9f7a-a8046464f855" name="Changes" comment="" />
+      <created>1694158151876</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1694158151876</updated>
+      <workItem from="1694158152674" duration="45000" />
+      <workItem from="1694158207807" duration="1261000" />
+      <workItem from="1694160697726" duration="5967000" />
+      <workItem from="1694167094945" duration="83165000" />
+      <workItem from="1694431737549" duration="63791000" />
+      <workItem from="1694571701122" duration="23000" />
+      <workItem from="1694577356255" duration="7107000" />
+      <workItem from="1694863985743" duration="71884000" />
+      <workItem from="1695003590855" duration="31462000" />
+      <workItem from="1695247292483" duration="16293000" />
+      <workItem from="1695767071002" duration="4791000" />
+      <workItem from="1696121643545" duration="3379000" />
+      <workItem from="1696831231011" duration="799000" />
+      <workItem from="1698035585640" duration="3274000" />
+      <workItem from="1706047654065" duration="31000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
