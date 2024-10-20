@@ -5,16 +5,22 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.residents.Residents;
@@ -32,7 +38,7 @@ public class ResidentNPC extends TraitStorage implements NPC {
     private final int id;
     private final UUID uuid;
     private final String name;
-    private final Location location;
+    private Location location;
     private static AtomicInteger atomicInteger;
     private final EntityController entityController;
     public final Set<Runnable> runnables = new HashSet<>();
@@ -65,6 +71,10 @@ public class ResidentNPC extends TraitStorage implements NPC {
         return metadata;
     }
 
+    public boolean spawn(){
+        return spawn(location);
+    }
+
     @Override
     public boolean spawn(Location location) {
         Preconditions.checkNotNull(location, "Location cannot be null");
@@ -88,9 +98,9 @@ public class ResidentNPC extends TraitStorage implements NPC {
         getEntity().setMetadata("NPC", new FixedMetadataValue(Residents.getPlugin(), true));
         getEntity().setMetadata("NPC-ID", new FixedMetadataValue(Residents.getPlugin(), getId()));
 
-        Set<Trait> preSpawnTraits = new HashSet<Trait>(traits.values());
+        Set<Trait> allTraits = new HashSet<Trait>(traits.values());
 
-        preSpawnTraits.forEach(trait -> {
+        allTraits.forEach(trait -> {
             try {
                 trait.onPreSpawn();
             } catch (Throwable ex) {
@@ -110,16 +120,64 @@ public class ResidentNPC extends TraitStorage implements NPC {
         NMS.setHeadYaw(getEntity(), location.getYaw());
         NMS.setBodyYaw(getEntity(), location.getYaw());
 
+        Consumer<Runnable> postSpawn = cancel -> {
+            if (getEntity() == null || !getEntity().isValid()) {
+                entityController.remove();
+                cancel.run();
+                return;
+            }
+
+            allTraits.forEach(trait -> {
+                try {
+                    trait.onSpawn();
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+                }
+            });
+
+            NMS.replaceTrackerEntry(getEntity());
+
+            if (getEntity().getType().isAlive()) {
+                LivingEntity entity = (LivingEntity) getEntity();
+                entity.setRemoveWhenFarAway(false);
+
+                if (NMS.getStepHeight(entity) < 1) {
+                    NMS.setStepHeight(entity, 1);
+                }
+            }
+        };
+
+        if (getEntity() != null && getEntity().isValid()) {
+            postSpawn.accept(() -> {
+            });
+        } else {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    postSpawn.accept(() -> cancel());
+                }
+            }.runTaskTimer(Residents.getPlugin(), 0, 1);
+        }
+
         return true;
     }
 
     @Override
     public boolean despawn() {
+        Set<Trait> allTraits = new HashSet<Trait>(traits.values());
+        allTraits.forEach(trait -> trait.onDespawn());
+        entityController.remove();
         return true;
     }
 
     @Override
     public void destroy() {
+        runnables.clear();
+        for (Trait trait : traits.values()) {
+            HandlerList.unregisterAll(trait);
+            trait.onRemove();
+        }
+        traits.clear();
     }
 
     @Override
@@ -157,13 +215,18 @@ public class ResidentNPC extends TraitStorage implements NPC {
     }
 
     @Override
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    @Override
     public boolean isProtected() {
-        return false;
+        return getMetadata().get(NPC.Metadata.DEFAULT_PROTECTED, true);
     }
 
     @Override
     public boolean isPushableByFluids() {
-        return false;
+        return getMetadata().get(NPC.Metadata.FLUID_PUSHABLE, isProtected());
     }
 
     @Override
@@ -184,6 +247,11 @@ public class ResidentNPC extends TraitStorage implements NPC {
 
     @Override
     public void setSkin(Property property) {
+        if (!getEntityType().equals(EntityType.PLAYER))
+            return;
+        PropertyMap properties = ((CraftPlayer) getEntity()).getProfile().getProperties();
+        properties.removeAll("textures");
+        properties.put("textures", property);
     }
 
     public boolean requiresNameHologram() {
@@ -237,6 +305,8 @@ public class ResidentNPC extends TraitStorage implements NPC {
 
         traits.put(clazz, trait);
 
+        Bukkit.getLogger().info("Added trait " + trait.getName() + " to " + toString());
+
         if (isSpawned()) {
             trait.onSpawn();
         }
@@ -249,9 +319,17 @@ public class ResidentNPC extends TraitStorage implements NPC {
         }
     }
 
+    public void update() {
+        try {
+            runnables.stream().forEach(r -> r.run());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public String toString() {
-        return getId() + "{" + getName() + ", " + null + "}";
+        return "NPC:" + getId() + "={" + getName() + ", " + getEntityType().name() + "}";
     }
 
     MetadataStore metadata = new SimpleMetadataStore() {

@@ -1,10 +1,9 @@
-package me.winflix.vitalcore.tribe.files;
+package me.winflix.vitalcore.general.files;
 
 import java.io.File;
 import java.io.IOException;
 
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.general.files.YmlFile;
 
 public class MessagesFile extends YmlFile {
 

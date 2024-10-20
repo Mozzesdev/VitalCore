@@ -10,8 +10,8 @@ import me.winflix.vitalcore.skins.models.Skin;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+
+import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
@@ -30,10 +30,8 @@ public class SkinGrabber {
     public static void changeSkinByPlayer(Player p) {
         CraftPlayer craftPlayer = (CraftPlayer) p;
         ServerPlayer serverPlayer = craftPlayer.getHandle();
-        GameProfile playerProfile = serverPlayer.getGameProfile();
+        GameProfile playerProfile = craftPlayer.getProfile();
         ServerGamePacketListenerImpl listener = serverPlayer.connection;
-
-        Bukkit.getLogger().info(p.getUniqueId().toString());
 
         Property skinProperty = fetchSkinByName(p.getDisplayName());
 
@@ -48,7 +46,7 @@ public class SkinGrabber {
 
         listener.send(packet);
     }
-
+    
     public static void changeSkinBySkin(Skin skin) {
 
     }

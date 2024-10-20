@@ -11,20 +11,22 @@ import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.database.collections.TribesCollection;
 import me.winflix.vitalcore.general.database.collections.UsersCollection;
 import me.winflix.vitalcore.general.utils.Utils;
+import me.winflix.vitalcore.structures.files.StructureFile;
 import me.winflix.vitalcore.tribe.files.UserFile;
-import me.winflix.vitalcore.tribe.files.MessagesFile;
 import me.winflix.vitalcore.tribe.files.TribeFile;
 
 public class FileManager {
 
     private static final String TRIBES_FOLDER = "tribes";
     private static final String USERS_FOLDER = "users";
+    private static final String STRUCTURES_FOLDER = "structures";
     private static final String MESSAGES_FILE_NAME = "en";
     private static final String I18N_FOLDER = "i18n";
     public List<TribeFile> tribeFiles = new ArrayList<>();
     public List<UserFile> usersFiles = new ArrayList<>();
     public FileConfiguration configFile;
     public MessagesFile messagesFile;
+    public StructureFile structuresFile;
     public VitalCore plugin;
 
     public FileManager(VitalCore plugin) {
@@ -33,8 +35,9 @@ public class FileManager {
         setupFolders();
         setupConfigFile();
         setupMessagesFiles();
-        setupTribesFiles();
-        setupUsersFiles();
+        setupStructuresFiles();
+        // setupTribesFiles();
+        // setupUsersFiles();
         setPrefixes();
     }
 
@@ -51,6 +54,11 @@ public class FileManager {
         createFolder(TRIBES_FOLDER);
         createFolder(USERS_FOLDER);
         createFolder(I18N_FOLDER);
+        createFolder(STRUCTURES_FOLDER);
+    }
+
+    public void setupStructuresFiles() {
+        structuresFile = new StructureFile(plugin, "structures", STRUCTURES_FOLDER);
     }
 
     public void setupTribesFiles() {
@@ -91,6 +99,10 @@ public class FileManager {
         return tribeFiles;
     }
 
+    public StructureFile getStructuresFile() {
+        return structuresFile;
+    }
+
     public TribeFile getTribeFile(String id) {
         return getTribesFiles().stream()
                 .filter(tribe -> tribe.getConfig().getString("id").equals(id))
@@ -112,8 +124,9 @@ public class FileManager {
     public void reloadAllFiles() {
         messagesFile.reloadConfig();
         plugin.reloadConfig();
-        setupUsersFiles();
-        setupTribesFiles();
+        structuresFile.reloadConfig();
+        // setupUsersFiles();
+        // setupTribesFiles();
         setPrefixes();
     }
 

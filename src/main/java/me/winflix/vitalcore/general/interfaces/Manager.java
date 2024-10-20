@@ -10,7 +10,7 @@ public abstract class Manager {
         Manager.plugin = plugin;
     }
 
-    public abstract void initialize();
+    public abstract Manager initialize();
 
     public abstract void setupCommands();
 
@@ -18,7 +18,7 @@ public abstract class Manager {
 
     public abstract void registerCommands();
 
-    public static VitalCore getPlugin(){
+    public static VitalCore getPlugin() {
         return plugin;
     };
 

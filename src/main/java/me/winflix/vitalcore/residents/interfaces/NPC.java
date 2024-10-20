@@ -34,6 +34,8 @@ public interface NPC {
 
     public Location getLocation();
 
+    public void setLocation(Location loc);
+
     public boolean isSpawned();
 
     public boolean isProtected();

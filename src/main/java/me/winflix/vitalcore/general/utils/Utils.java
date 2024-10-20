@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
@@ -38,6 +41,32 @@ public class Utils {
         value = ChatColor.translateAlternateColorCodes('&', value);
 
         return value;
+    }
+
+    public static Location locationfromString(String locationString) {
+        // Remover "Location{" al principio y "}" al final
+        locationString = locationString.replace("Location{", "").replace("}", "");
+
+        // Separar los valores por las comas
+        String[] parts = locationString.split(",");
+
+        // Extraer los valores individuales
+        String worldName = parts[0].split("=")[1];
+        double x = Double.parseDouble(parts[1].split("=")[1]);
+        double y = Double.parseDouble(parts[2].split("=")[1]);
+        double z = Double.parseDouble(parts[3].split("=")[1]);
+        float pitch = Float.parseFloat(parts[4].split("=")[1]);
+        float yaw = Float.parseFloat(parts[5].split("=")[1]);
+
+        // Obtener el mundo de Bukkit
+        World world = Bukkit.getWorld(worldName);
+
+        // Devolver la nueva instancia de Location
+        if (world != null) {
+            return new Location(world, x, y, z, yaw, pitch);
+        } else {
+            throw new IllegalArgumentException("El mundo '" + worldName + "' no existe.");
+        }
     }
 
     public static void infoMessage(Player p, String message) {

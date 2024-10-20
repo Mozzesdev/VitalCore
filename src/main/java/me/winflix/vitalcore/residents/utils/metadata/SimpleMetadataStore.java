@@ -22,7 +22,7 @@ public class SimpleMetadataStore implements MetadataStore {
     @Override
     public <T> T get(NPC.Metadata key) {
         Preconditions.checkNotNull(key, "key cannot be null");
-        MetadataObject normal = this.npcMetadata.get(key);
+        MetadataObject normal = npcMetadata.get(key);
         return normal == null ? null : (T) normal.value;
     }
 
@@ -52,7 +52,7 @@ public class SimpleMetadataStore implements MetadataStore {
     @Override
     public boolean has(NPC.Metadata key) {
         Preconditions.checkNotNull(key, "key cannot be null");
-        return this.npcMetadata.containsKey(key);
+        return npcMetadata.containsKey(key);
     }
 
     @Override
@@ -75,9 +75,9 @@ public class SimpleMetadataStore implements MetadataStore {
     public void set(NPC.Metadata key, Object data) {
         Preconditions.checkNotNull(key, "key cannot be null");
         if (data == null) {
-            this.remove(key);
+            remove(key);
         } else {
-            this.npcMetadata.put(key, new MetadataObject(data));
+            npcMetadata.put(key, new MetadataObject(data));
         }
 
     }
@@ -95,14 +95,14 @@ public class SimpleMetadataStore implements MetadataStore {
 
     @Override
     public int size() {
-        return this.metadata.size() + this.npcMetadata.size();
+        return metadata.size() + npcMetadata.size();
     }
 
     private static class MetadataObject {
         final Object value;
 
         public MetadataObject(Object raw) {
-            this.value = raw;
+            value = raw;
         }
     }
 }

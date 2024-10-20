@@ -5,15 +5,18 @@ import java.net.Socket;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import com.mojang.authlib.GameProfile;
 
+import me.winflix.vitalcore.residents.Residents;
 import me.winflix.vitalcore.residents.interfaces.NPC;
+import me.winflix.vitalcore.residents.interfaces.NPCHolder;
 import me.winflix.vitalcore.residents.models.ResidentNPC;
+import me.winflix.vitalcore.residents.trait.traits.Gravity;
 import me.winflix.vitalcore.residents.utils.network.EmptyNetHandler;
 import me.winflix.vitalcore.residents.utils.network.EmptyNetManager;
 import me.winflix.vitalcore.residents.utils.network.EmptySocket;
@@ -21,18 +24,22 @@ import me.winflix.vitalcore.residents.utils.nms.NMS;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
-public class PlayerEntityNPC extends ServerPlayer {
+public class PlayerEntityNPC extends ServerPlayer implements NPCHolder {
 
     private final ResidentNPC npc;
     private boolean isEntitySetter;
 
     public PlayerEntityNPC(MinecraftServer server, ServerLevel level, GameProfile profile, NPC npc) {
-        super(server, level, profile);
+        super(server, level, profile, ClientInformation.createDefault());
         this.npc = (ResidentNPC) npc;
         if (npc != null) {
             getGameMode().changeGameModeForPlayer(GameType.SURVIVAL);
@@ -47,7 +54,7 @@ public class PlayerEntityNPC extends ServerPlayer {
         try {
             conn = new EmptyNetManager(PacketFlow.CLIENTBOUND);
             connection = new EmptyNetHandler(server, conn, this);
-            conn.setListener(connection);
+            conn.setListenerForServerboundHandshake(connection);
             socket.close();
         } catch (IOException e) {
         }
@@ -60,13 +67,67 @@ public class PlayerEntityNPC extends ServerPlayer {
         setSkinFlags(flags);
     }
 
+    @Override
+    public void die(DamageSource damagesource) {
+        if (dead) {
+            return;
+        }
+        super.die(damagesource);
+        Bukkit.getScheduler().runTaskLater(Residents.getPlugin(), () -> {
+            ((ServerLevel) level()).removePlayerImmediately(this, RemovalReason.KILLED);
+            ((ServerLevel) level()).getChunkSource().removeEntity(this);
+        }, 15);
+    }
+
+    @Override
+    public void doTick() {
+        if (npc == null) {
+            super.doTick();
+            return;
+        }
+        super.baseTick();
+        if (getBukkitEntity() != null
+                && (!npc.hasTrait(Gravity.class) || npc.getOrAddTrait(Gravity.class).hasGravity())) {
+            moveWithFallDamage(Vec3.ZERO);
+        }
+    }
+
+    private void moveWithFallDamage(Vec3 vec) {
+        double x = getX();
+        double y = getY();
+        double z = getZ();
+        travel(vec);
+        if (!npc.isProtected()) {
+            doCheckFallDamage(getX() - x, getY() - y, getZ() - z, onGround);
+        }
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return NMS.getSoundEffect(npc, super.getDeathSound(), NPC.Metadata.DEATH_SOUND);
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource damagesource) {
+        return NMS.getSoundEffect(npc, super.getHurtSound(damagesource), NPC.Metadata.HURT_SOUND);
+    }
+
     private void setSkinFlags(byte flags) {
         getEntityData().set(EntityDataSerializers.BYTE.createAccessor(17), flags);
     }
 
     @Override
-    public CraftPlayer getBukkitEntity(){
-        if(npc != null && !isEntitySetter){
+    public boolean isPushable() {
+        return npc == null ? super.isPushable() : npc.getMetadata().<Boolean>get(NPC.Metadata.COLLIDABLE, false);
+    }
+
+    public NPC getNPC() {
+        return npc;
+    }
+
+    @Override
+    public CraftPlayer getBukkitEntity() {
+        if (npc != null && !isEntitySetter) {
             NMS.setBukkitEntity(this, new PlayerNPC(this));
             isEntitySetter = true;
         }

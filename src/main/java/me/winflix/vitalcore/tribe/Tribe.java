@@ -7,6 +7,7 @@ import org.bukkit.command.PluginCommand;
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.commands.CommandManager;
 import me.winflix.vitalcore.general.commands.SubCommand;
+import me.winflix.vitalcore.general.interfaces.Manager;
 import me.winflix.vitalcore.tribe.commands.home.SetTribeHome;
 import me.winflix.vitalcore.tribe.commands.home.ToTribeHome;
 import me.winflix.vitalcore.tribe.commands.members.Accept;
@@ -20,14 +21,18 @@ import me.winflix.vitalcore.tribe.commands.menus.Menu;
 import me.winflix.vitalcore.tribe.events.JoinEvents;
 import me.winflix.vitalcore.tribe.menu.TribeMenu;
 
-public class Tribe {
+public class Tribe extends Manager {
 
     private final ArrayList<SubCommand> tribeCommands = new ArrayList<>();
-    VitalCore plugin = VitalCore.getPlugin();
 
-    public void initialize() {
+    public Tribe(VitalCore plugin) {
+        super(plugin);
+    }
+
+    public Tribe initialize() {
         setupEvents();
         setupCommands();
+        return this;
     }
 
     public void setupEvents() {

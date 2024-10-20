@@ -10,8 +10,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
@@ -36,7 +36,6 @@ public class PlayerController extends AbstractEntityController {
 
         final GameProfile profile = new GameProfile(uuid, name);
         final PlayerEntityNPC handle = new PlayerEntityNPC(MinecraftServer.getServer(), nmsWorld, profile, npc);
-
         configureEntity(handle.getBukkitEntity(), npc);
 
         return handle.getBukkitEntity();

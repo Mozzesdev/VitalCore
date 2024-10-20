@@ -1,6 +1,11 @@
 package me.winflix.vitalcore.residents.utils;
 
+import java.util.concurrent.Callable;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+
+import me.winflix.vitalcore.residents.Residents;
 
 public class Utils {
 
@@ -21,5 +26,23 @@ public class Utils {
         }
         return angle;
     }
-    
+
+    public static <T> T callPossiblySync(Callable<T> callable, boolean sync) {
+        if (!sync) {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            return Bukkit.getScheduler().callSyncMethod(Residents.getPlugin(), callable).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

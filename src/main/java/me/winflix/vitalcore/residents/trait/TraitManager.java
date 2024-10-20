@@ -8,11 +8,16 @@ import java.util.Map;
 
 import com.google.common.base.Preconditions;
 
+import me.winflix.vitalcore.residents.trait.traits.Gravity;
+import me.winflix.vitalcore.residents.trait.traits.LookClose;
+
 public class TraitManager {
     private final List<TraitInfo> defaultTraits = new ArrayList<>();
     private final Map<String, TraitInfo> registered = new HashMap<>();
 
     public TraitManager() {
+        registerTrait(TraitInfo.create(LookClose.class));
+        registerTrait(TraitInfo.create(Gravity.class));
     }
 
     public void addDefaultTraits(TraitStorage traitStorage) {

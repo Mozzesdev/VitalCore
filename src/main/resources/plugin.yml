@@ -22,3 +22,8 @@ commands:
     description: Main command of the VitalCore
     usage: /<command>
     aliases:
+  structures:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - str

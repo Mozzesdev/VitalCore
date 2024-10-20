@@ -11,6 +11,27 @@ import com.google.common.collect.Lists;
 
 public class Reflection {
 
+    public static Field getField(Class<?> clazz, String field) {
+        if (clazz == null)
+            return null;
+        Field f = null;
+        try {
+            f = clazz.getDeclaredField(field);
+            f.setAccessible(true);
+            return f;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static MethodHandle getGetter(Class<?> clazz, String name) {
+        try {
+            return LOOKUP.unreflectGetter(getField(clazz, name));
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
     public static MethodHandle getFirstGetter(Class<?> clazz, Class<?> type) {
         try {
             List<Field> found = getFieldsMatchingType(clazz, type, false);
@@ -76,6 +97,26 @@ public class Reflection {
             field = clazz.getDeclaredField(name);
             field.setAccessible(true);
 
+            return LOOKUP.unreflectSetter(field);
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    public static MethodHandle getFirstFinalSetter(Class<?> clazz, Class<?> type) {
+        try {
+            List<Field> found = getFieldsMatchingType(clazz, type, false);
+            if (found.isEmpty())
+                return null;
+            return getFinalSetter(found.get(0));
+        } catch (Exception e) {
+            // Messaging.logTr(Messages.ERROR_GETTING_FIELD, type, e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    private static MethodHandle getFinalSetter(Field field){
+        try {
             return LOOKUP.unreflectSetter(field);
         } catch (Exception e) {
         }
