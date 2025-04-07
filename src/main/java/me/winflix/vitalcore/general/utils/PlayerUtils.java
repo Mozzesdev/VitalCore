@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -56,4 +58,21 @@ public class PlayerUtils {
 
         return null;
     }
+
+    public static UUID getPlayerUUID(Object player) {
+        if (player instanceof Player)
+            return ((Player) player).getUniqueId();
+        if (player instanceof OfflinePlayer)
+            return ((OfflinePlayer) player).getUniqueId();
+        throw new IllegalArgumentException("Tipo de jugador no válido");
+    }
+
+    public static String getPlayerName(Object player) {
+        if (player instanceof Player)
+            return ((Player) player).getName();
+        if (player instanceof OfflinePlayer)
+            return ((OfflinePlayer) player).getName();
+        throw new IllegalArgumentException("Tipo de jugador no válido");
+    }
+
 }

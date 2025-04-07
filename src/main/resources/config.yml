@@ -1,1 +1,3 @@
 plugin: VitalCore
+tribe:
+  allow_yaml: true

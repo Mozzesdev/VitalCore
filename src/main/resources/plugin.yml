@@ -1,7 +1,7 @@
 name: VitalCore
 main: me.winflix.vitalcore.VitalCore
 version: ${project.version}
-api-version: 1.19
+api-version: 1.21
 authors: [ WinFlix ]
 description: Core of OverWild
 commands:
@@ -22,8 +22,23 @@ commands:
     description: Main command of the VitalCore
     usage: /<command>
     aliases:
-  structures:
+  skins:
     description: Main command of the VitalCore
     usage: /<command>
     aliases:
-      - str
+      - skin
+  tpa:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - teleport
+  tpaccept:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - teleportaccept
+  tpadeny:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - teleportdeny

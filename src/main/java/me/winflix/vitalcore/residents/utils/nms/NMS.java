@@ -4,10 +4,11 @@ import java.lang.invoke.MethodHandle;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -19,9 +20,11 @@ import me.winflix.vitalcore.residents.interfaces.NPC;
 import me.winflix.vitalcore.residents.interfaces.NPCHolder;
 import me.winflix.vitalcore.residents.utils.Utils;
 import me.winflix.vitalcore.residents.utils.network.EmptyChannel;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
@@ -53,9 +56,17 @@ public class NMS {
     }
 
     public static SoundEvent getSoundEffect(NPC npc, SoundEvent snd, NPC.Metadata meta) {
-        return npc == null || !npc.getMetadata().has(meta) ? snd
-                : BuiltInRegistries.SOUND_EVENT
-                        .get(ResourceLocation.withDefaultNamespace(npc.getMetadata().get(meta, snd == null ? "" : snd.toString())));
+        if (npc == null || !npc.getMetadata().has(meta)) {
+            return snd;
+        }
+
+        String metaValue = npc.getMetadata().get(meta, snd == null ? "" : snd.toString());
+        ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace(metaValue);
+
+        Optional<Holder.Reference<SoundEvent>> optionalHolder = BuiltInRegistries.SOUND_EVENT.get(resourceLocation);
+
+        return optionalHolder.map(holder -> holder.value())
+                .orElse(snd);
     }
 
     public static void setStepHeight(Entity entity, float height) {
@@ -173,10 +184,18 @@ public class NMS {
         ClientboundPlayerInfoUpdatePacket packet = ClientboundPlayerInfoUpdatePacket
                 .createPlayerInitializing(Arrays.asList(from));
         boolean list = false;
-        ClientboundPlayerInfoUpdatePacket.Entry entry = new ClientboundPlayerInfoUpdatePacket.Entry(from.getUUID(),
-                from.getGameProfile(), list, from.connection.latency(), from.gameMode.getGameModeForPlayer(),
+        RemoteChatSession chatSession = from.getChatSession();
+        ClientboundPlayerInfoUpdatePacket.Entry entry = new ClientboundPlayerInfoUpdatePacket.Entry(
+                from.getUUID(),
+                from.getGameProfile(),
+                list,
+                from.connection.latency(),
+                from.gameMode.getGameModeForPlayer(),
                 list ? from.getTabListDisplayName() : Component.empty(),
-                from.getChatSession() == null ? null : from.getChatSession().asData());
+                true,
+                0,
+                chatSession != null ? chatSession.asData() : null);
+
         try {
             PLAYER_INFO_ENTRIES_LIST.invoke(packet, Lists.newArrayList(entry));
         } catch (Throwable e) {

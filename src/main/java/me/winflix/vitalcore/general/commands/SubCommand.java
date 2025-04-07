@@ -9,6 +9,7 @@ public abstract class SubCommand {
     // name of the subcommand ex. /prank <subcommand> <-- that
     public abstract String getName();
 
+    // variant of the subcommand ex. /prank invite or /prank inv <-- that
     public abstract String getVariants();
 
     // ex. "This is a subcommand that let's a shark eat someone"

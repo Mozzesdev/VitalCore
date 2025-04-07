@@ -1,0 +1,94 @@
+prefixes:
+  error: "&7[&6${plugin}&7] ->&c "
+  success: "&7[&a${plugin}&7] ->&a "
+  info: "&8[&7${plugin}&8] ->&7 "
+tribes:
+  create:
+    cmd:
+      desc: "Crea una tribu si no estas en una."
+      usage: "/tribe create <nombre> <etiqueta>"
+    success: "La tribu {tribe_name} fue creada exitosamente."
+    error: "Hubo un error al crear la tribu, contacta al staff."
+    already_in_tribe: "No puedes create una tribu, ya eres miembro de una."
+    name_taken: "El nombre de la tribu ya está en uso."
+    tag: "La etiqueta de la tribu no puede estar vacía."
+    invalid_name: "El nombre de la tribu solo puede contener letras y números entre {min} y {max} caracteres."
+    invalid_tag: "La etiqueta de la tribu solo puede contener letras y números entre {min} y {max} caracteres."
+    tag_exist: "La etiqueta de la tribu ya está en uso."
+  delete:
+    success: "Tribu eliminada exitosamente."
+    error: "Error al eliminar la tribu."
+    confirm: "¿Estás seguro de que deseas eliminar la tribu?"
+  invites:
+    menu:
+      title: "&c¡¿Seguro deseas unirte a la tribu?!"
+      accept:
+        message: "&aAceptar invitación"
+        lore:
+          - ""
+      reject:
+        message: "&cRechazar invitación"
+        lore:
+          - ""
+    target:
+      invite: "¡Recibiste una invitación para unirte a la tribu ${tribe:name}! &7(${clk:accept} &b|| ${clk:reject}&7)"
+      accept: "Aceptaste la invitación a la tribu ${tribe:name}."
+      rejected: "Rechazaste la invitación a la tribu ${tribe:name}."
+    off-target:
+      invite: "Enviaste una invitación a ${target:name}"
+      accept: "${target:name} ha aceptado la invitación a la tribu."
+      rejected: "${target:name} ha rechazado la invitación a la tribu."
+    options:
+      close: "La tribu actualmente está cerrada a nuevos miembros."
+      open: "La tribu actualmente está abierta a nuevos miembros."
+      cant-invite: "No tienes permiso para invitar nuevos miembros."
+      offline: "El jugador ${target:name} no está en línea."
+      self: "No puedes invitarte a ti mismo a tu tribu."
+      no_tribe: "No puedes invitarte a nadie por que no estas en ninguna tribu."
+      cancel: "Cancelaste la invitación a la tribu ${tribe:name}."
+      exist: "El jugador ${target:name} ya está en tu tribu."
+  promotes:
+    menu:
+      title: "&c¿Deseas promover a ${target:name}?"
+      accept:
+        message: "&aConfirmar promoción"
+        lore:
+          - ""
+      reject:
+        message: "&cCancelar promoción"
+        lore:
+          - ""
+    target:
+      promote: "Has sido nominado para ascender a ${tribe:rank} en la tribu ${tribe:name}."
+      accept: "Fuiste ascendido al rango ${tribe:rank} en la tribu ${tribe:name}."
+      rejected: "El ascenso a ${tribe:rank} ha sido rechazado."
+    off-target:
+      promote: "Nominaste a ${target:name} para promoción."
+      accept: "Promoviste a ${target:name} al rango ${tribe:rank}."
+      rejected: "Cancelaste la promoción de ${target:name}."
+      error: "Error al procesar la solicitud de promoción."
+  homes:
+    add:
+      success: "Ubicación de la casa tribal guardada exitosamente."
+      no_tribe: "No puedes guardar una casa tribal si no eres miembro de una."
+      error: "Error al establecer la casa tribal."
+      restricted: "Solo puedes crear casas tribales en el Overworld."
+    remove:
+      success: "Ubicación de la casa tribal eliminada exitosamente."
+      error: "Error al eliminar la casa tribal."
+    to:
+      success: "Teletransportado exitosamente a la casa tribal."
+      error: "No se pudo teletransportar. Verifica que exista e inténtalo de nuevo."
+      canceled: "Teletransporte a la casa tribal cancelado."
+      cooldown: "&cDebes esperar {time} antes de teletransportarte nuevamente."
+    limit: "&cLímite máximo de casas tribales alcanzado ({max_homes})."
+  permissions:
+    base: "&cNo tienes permiso para esta acción tribal."
+reload: "Plugin recargado exitosamente."
+general:
+  clk-action:
+    accept: "&aAceptar"
+    reject: "&cRechazar"
+  commands:
+    unknown: "Comando desconocido o sin permisos suficientes."
+    syntax: "&bError de sintaxis: usa ${cm:syntax}"

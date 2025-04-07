@@ -21,7 +21,7 @@ import me.winflix.vitalcore.structures.models.Structure;
 public class StructureManager {
 
     private List<Structure> allStructures = new ArrayList<>();
-    private StructureFile structuresFile = VitalCore.fileManager.getStructuresFile();
+    private StructureFile structuresFile = null;
     private static final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
             .registerTypeAdapter(Structure.class, new StructureTypeAdapter())
             .create();
@@ -52,6 +52,10 @@ public class StructureManager {
 
     public List<Structure> getAllStructures() {
         return allStructures;
+    }
+
+    public Structure getStructureById(String id) {
+        return allStructures.stream().filter(str -> str.getId().equals(id)).findFirst().orElse(null);
     }
 
     public static Structure fromJson(String json) {

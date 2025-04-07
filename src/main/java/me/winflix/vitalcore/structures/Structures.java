@@ -14,6 +14,7 @@ import me.winflix.vitalcore.structures.events.BreakStructure;
 import me.winflix.vitalcore.structures.events.PlaceStructure;
 import me.winflix.vitalcore.structures.events.StructureProtection;
 import me.winflix.vitalcore.structures.region.RegionManager;
+import me.winflix.vitalcore.structures.states.PlayerBuildState;
 import me.winflix.vitalcore.structures.utils.StructureManager;
 
 public class Structures extends Manager {
@@ -21,9 +22,11 @@ public class Structures extends Manager {
     private final ArrayList<SubCommand> strCommands = new ArrayList<>();
     public static RegionManager regionManager;
     public static StructureManager structureManager;
+    private PlayerBuildState playerBuildState;
 
     public Structures(VitalCore plugin) {
         super(plugin);
+        playerBuildState = new PlayerBuildState();
         regionManager = new RegionManager();
         structureManager = new StructureManager();
     }
@@ -34,8 +37,12 @@ public class Structures extends Manager {
         return this;
     }
 
+    public PlayerBuildState getPlayerBuildState() {
+        return playerBuildState;
+    }
+
     public void setupEvents() {
-        plugin.getServer().getPluginManager().registerEvents(new PlaceStructure(regionManager), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new PlaceStructure(regionManager, structureManager), plugin);
         plugin.getServer().getPluginManager().registerEvents(new BreakStructure(regionManager), plugin);
         plugin.getServer().getPluginManager().registerEvents(new StructureProtection(regionManager), plugin);
     }

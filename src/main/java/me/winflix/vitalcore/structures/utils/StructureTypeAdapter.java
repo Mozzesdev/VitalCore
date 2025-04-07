@@ -1,5 +1,6 @@
 package me.winflix.vitalcore.structures.utils;
 
+import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.structures.interfaces.StructuresType;
 import me.winflix.vitalcore.structures.models.Facing;
 import me.winflix.vitalcore.structures.models.Foundation;
@@ -38,6 +39,9 @@ public class StructureTypeAdapter extends TypeAdapter<Structure> {
         out.name("buildTime").value(structure.getBuildTime());
         if (structure.getFace() != null) {
             out.name("face").value(structure.getFace().toString());
+        }
+        if (structure.getBuildLocation() != null) {
+            out.name("buildLocation").value(structure.getBuildLocation().toString());
         }
 
         // Escribiendo la matriz de materiales
@@ -137,6 +141,7 @@ public class StructureTypeAdapter extends TypeAdapter<Structure> {
         boolean fullDrop = true;
         int buildTime = 3;
         Facing face = null;
+        Location buildLocation = null;
 
         in.beginObject(); // Inicia la lectura del objeto JSON
 
@@ -176,6 +181,9 @@ public class StructureTypeAdapter extends TypeAdapter<Structure> {
                 case "recipe":
                     recipe = readRecipe(in);
                     break;
+                case "buildLocation":
+                    buildLocation = Utils.locationfromString(in.nextString());
+                    break;
             }
         }
 
@@ -198,7 +206,7 @@ public class StructureTypeAdapter extends TypeAdapter<Structure> {
         structure.setBlockPositions(blockPositions);
         structure.setFullDrop(fullDrop);
         structure.setBuildTime(buildTime);
-
+        structure.setBuildLocation(buildLocation);
         structure.setFace(face);
 
         if (structure.getRawRecipe() != null && structure.getShapedRecipe() != null)

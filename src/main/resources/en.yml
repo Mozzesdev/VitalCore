@@ -5,72 +5,76 @@ prefixes:
 tribes:
   invites:
     menu:
-      title: "&c¡Seguro te deseas unir a la tribu?!"
+      title: "&cAre you sure you want to join the tribe?!"
       accept:
-        message: "&aAceptar invitacion"
+        message: "&aAccept invitation"
         lore:
           - ""
       reject:
-        message: "&cNo aceptar invitacion"
+        message: "&cDecline invitation"
         lore:
           - ""
     target:
-      invite: "Has recibido una invitación para unirte a la tribu de ${tribe:name}! &7(${clk:accept} &b|| ${clk:reject}&7)"
-      accept: "Has aceptado la invitación a la tribu de ${tribe:name}."
-      rejected: "Has rechazado la invitación a la tribu de ${tribe:name}."
+      invite: "You received an invitation to join ${tribe:name} tribe! &7(${clk:accept} &b|| ${clk:reject}&7)"
+      accept: "You accepted the invitation to ${tribe:name} tribe."
+      rejected: "You declined the invitation to ${tribe:name} tribe."
     off-target:
-      invite: "Has enviado una invitación a ${target:name}"
-      accept: "${target:name} ha aceptado la invitación a la tribu."
-      rejected: "${target:name} ha rechazado la invitación a la tribu."
+      invite: "You sent an invitation to ${target:name}"
+      accept: "${target:name} has accepted the tribe invitation."
+      rejected: "${target:name} has declined the tribe invitation."
     options:
-      close: "La tribu actualmente está cerrada a nuevos miembros."
-      open: "La tribu actualmente está abierta a nuevos miembros"
-      cant-invite: "No tienes permitido invitar a nuevos miembros."
-      offline: "El jugador ${target:name} no esta actualmente en linea."
-      self: "No puedes invitarte a ti mismo a tu tribu."
-      cancel: "Has cancelado la invitacion de la tribu de ${tribe:name}"
-      exist: "El jugador ${target:name} ya se encuentra actualmente en tu tribu."
+      close: "The tribe is currently closed to new members."
+      open: "The tribe is currently open to new members."
+      cant-invite: "You don't have permission to invite new members."
+      offline: "Player ${target:name} is currently offline."
+      self: "You can't invite yourself to your own tribe."
+      cancel: "You canceled the invitation to ${tribe:name} tribe."
+      exist: "Player ${target:name} is already in your tribe."
   promotes:
     menu:
-      title: "&c¿Deseas promover a ${target:name}?"
+      title: "&cDo you want to promote ${target:name}?"
       accept:
-        message: "&aEstoy seguro"
+        message: "&aConfirm promotion"
         lore:
           - ""
       reject:
-        message: "&cNo estoy seguro"
+        message: "&cCancel promotion"
         lore:
           - ""
     target:
-      promote: ""
-      accept: "Has sido promovido a el rango ${tribe:rank} en la tribu de ${tribe:name}."
-      rejected: ""
+      promote: "You've been nominated for promotion to ${tribe:rank} in ${tribe:name} tribe."
+      accept: "You've been promoted to ${tribe:rank} rank in ${tribe:name} tribe."
+      rejected: "Promotion to ${tribe:rank} has been rejected."
     off-target:
-      promote: ""
-      accept: "Has promovido a ${target:name} al rango ${tribe:name}."
-      rejected: "Has cancelado la promocion a ${target:name}."
+      promote: "You nominated ${target:name} for promotion."
+      accept: "You promoted ${target:name} to ${tribe:rank} rank."
+      rejected: "You canceled the promotion for ${target:name}."
+      error: "Failed to process promotion request."
   homes:
     add:
-      success: "Se guardó correctamente la casa de tu tribu."
-      error: ""
-      restricted: "Sólo puedes crear la casa de tu tribu en el overworld."
+      success: "Tribe home location saved successfully."
+      error: "Failed to set tribe home location."
+      restricted: "You can only create tribe homes in the Overworld."
     remove:
-      success: ""
-      error: ""
+      success: "Tribe home location removed successfully."
+      error: "Failed to remove tribe home location."
     to:
-      success: "Te has teletransportado correctamente a la casa de tu tribu"
-      error: "No has podido ir a la casa de tu tribu, verifica si existe y intentalo de nuevo."
-      canceled: ""
+      success: "Successfully teleported to tribe home."
+      error: "Could not teleport to tribe home. Verify its existence and try again."
+      canceled: "Teleportation to tribe home canceled."
+      cooldown: "&cYou must wait {time} before teleporting again."
+    limit: "&cMaximum number of tribe homes reached ({max_homes})."
+  permissions:
+    base: "&cYou don't have permission for this tribe action."
   commands:
-    unknown: "Comando desconocido o no tienes permisos para ejecutarlo."
-    syntax: "&bSyntax error: use ${cm:syntax}"
     invite:
       syntax: "/tribe invite <player>"
-      description: "This command invite a player to your tribe."
-reload: "Se ha recargado el plugin correctamente"
+      description: "Invite a player to your tribe."
+reload: "Plugin reloaded successfully."
 general:
   clk-action:
-    accept: "&aAceptar"
-    reject: "&cRechazar"
+    accept: "&aAccept"
+    reject: "&cReject"
   commands:
-    unknown: "Comando desconocido o no tienes permisos para ejecutarlo."
+    unknown: "Unknown command or insufficient permissions."
+    syntax: "&bSyntax error: use ${cm:syntax}"

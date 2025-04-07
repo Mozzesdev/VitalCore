@@ -1,48 +1,58 @@
 package me.winflix.vitalcore.general.database;
 
-import org.bson.UuidRepresentation;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import org.bukkit.ChatColor;
-
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoException;
-import com.mongodb.ServerApi;
-import com.mongodb.ServerApiVersion;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.general.database.collections.TribesCollection;
-import me.winflix.vitalcore.general.database.collections.UsersCollection;
+import me.winflix.vitalcore.general.database.collections.tribe.TribesDAO;
+import me.winflix.vitalcore.general.database.collections.tribe.UsersDAO;
 
 public class Database {
 
+    private static Connection connection;
+
     public static void connect() {
         try {
-            MongoClientSettings settings = createMongoClientSettings();
+            // 1. Cargar explícitamente el driver (CRUCIAL para plugins)
+            Class.forName("org.postgresql.Driver");
 
-            MongoClient mongoClient = MongoClients.create(settings);
-            MongoDatabase database = mongoClient.getDatabase("VitalCore");
+            // 2. Parámetros de conexión
+            String url = "jdbc:postgresql://127.0.0.1:5432/postgres";
+            String user = "postgres";
+            String password = "";
 
-            UsersCollection.initialize(database);
-            TribesCollection.initialize(database);
+            // 3. Establecer conexión
+            connection = DriverManager.getConnection(url, user, password);
 
-            VitalCore.Log.info(ChatColor.translateAlternateColorCodes('&', "&aConnected to MongoDB!"));
-        } catch (MongoException e) {
-            VitalCore.Log.info(e.getLocalizedMessage());
+            // 4. Verificar conexión
+            if (connection != null && !connection.isClosed()) {
+                TribesDAO.initialize(connection);
+                UsersDAO.initialize(connection);
+                VitalCore.Log.info(ChatColor.translateAlternateColorCodes('&', "&aConnected to PostgreSQL!"));
+            }
+
+        } catch (ClassNotFoundException e) {
+            VitalCore.Log.info("Falta el driver PostgreSQL: " + e.getMessage());
+        } catch (SQLException e) {
+            VitalCore.Log.info("Error de conexión PostgreSQL: " + e.getMessage());
         }
     }
 
-    private static MongoClientSettings createMongoClientSettings() {
-        ConnectionString connectionString = new ConnectionString(
-                "mongodb+srv://Winflix:vjvUdFvRcdHd7gVW@spigotcluster.3drjzzo.mongodb.net/?retryWrites=true&w=majority");
-        ServerApi serverApi = ServerApi.builder()
-                .version(ServerApiVersion.V1)
-                .build();
-        return MongoClientSettings.builder().uuidRepresentation(UuidRepresentation.STANDARD)
-                .applyConnectionString(connectionString).serverApi(serverApi)
-                .build();
+    public static Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connect(); // Reconectar si es necesario
+        }
+        return connection;
     }
 
+    public static void disconnect() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            VitalCore.Log.info("Error cerrando conexión: " + e.getMessage());
+        }
+    }
 }

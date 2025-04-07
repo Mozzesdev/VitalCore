@@ -3,24 +3,23 @@ package me.winflix.vitalcore;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import me.winflix.vitalcore.structures.Structures;
-
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.winflix.vitalcore.core.Core;
+import me.winflix.vitalcore.general.database.Database;
 import me.winflix.vitalcore.general.events.MenuEvents;
 import me.winflix.vitalcore.general.files.FileManager;
 import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.skins.Skins;
+import me.winflix.vitalcore.tribes.Tribes;
 
 public class VitalCore extends JavaPlugin {
     public static final Logger Log = Logger.getLogger("VitalCore");
     private static VitalCore plugin;
     public static FileManager fileManager;
     private static final HashMap<Player, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
-    public Structures structures;
 
     @Override
     public void onEnable() {
@@ -29,17 +28,17 @@ public class VitalCore extends JavaPlugin {
 
         new Core(this).initialize();
         new Skins(this).initialize();
-        structures = new Structures(this).initialize();
+        new Tribes(this).initialize();
 
         registerGeneralEvents();
-        // Database.connect();
+        Database.connect();
 
         Log.info(Utils.useColors("&ahas been enabled"));
     }
 
     @Override
     public void onDisable() {
-        structures.onDisable(plugin);
+        Database.disconnect();
         Log.info(Utils.useColors("&chas been disabled"));
     }
 

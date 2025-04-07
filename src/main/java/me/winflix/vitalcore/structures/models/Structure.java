@@ -25,6 +25,7 @@ import me.winflix.vitalcore.structures.interfaces.StructureRecipeHolder;
 import me.winflix.vitalcore.structures.interfaces.StructuresType;
 import me.winflix.vitalcore.structures.region.RegionManager;
 import me.winflix.vitalcore.structures.utils.StructureBlockPosition;
+import me.winflix.vitalcore.structures.utils.StructureManager;
 
 public class Structure extends StructureRecipeHolder {
     @Expose
@@ -43,6 +44,8 @@ public class Structure extends StructureRecipeHolder {
     protected int buildTime = 3;
     @Expose
     protected Facing face;
+    @Expose
+    protected Location buildLocation;
 
     public Structure(String name, StructuresType type, float health, Material[][][] matriz, String id) {
         this.name = name;
@@ -72,6 +75,14 @@ public class Structure extends StructureRecipeHolder {
 
     public Material[][][] getMatriz() {
         return matriz;
+    }
+
+    public Location getBuildLocation() {
+        return buildLocation;
+    }
+
+    public void setBuildLocation(Location buildLocation) {
+        this.buildLocation = buildLocation;
     }
 
     public List<StructureBlockPosition> getBlockPositions() {
@@ -166,15 +177,17 @@ public class Structure extends StructureRecipeHolder {
         return locations;
     }
 
-    public boolean build(Location loc, Player player, RegionManager regionManager) {
+    public boolean build(Location loc, Player player) {
         List<StructureBlockPosition> blockPositions = calculateBlockPositions(loc);
         this.blockPositions = blockPositions;
+        this.buildLocation = loc;
 
         // Verifica si ya hay bloques problemáticos (por ejemplo, cofres o inventarios)
         for (StructureBlockPosition blockPos : blockPositions) {
             Block existingBlock = blockPos.getLocation().getBlock();
             if (existingBlock.getState() instanceof InventoryHolder) {
-                player.sendMessage(Utils.useColors("&cNo se puede construir aquí debido a un bloque con inventario."));
+                player.sendMessage(
+                        Utils.useColors("&cNo se puede construir aquí debido a un bloque con inventario."));
                 return false;
             }
         }
@@ -202,14 +215,23 @@ public class Structure extends StructureRecipeHolder {
                     return;
                 }
 
-                // Colocamos el siguiente bloque
+                // Colocamos el siguiente bloque solo si no existe ya el mismo material en ese
+                // lugar
                 StructureBlockPosition blockPos = blockPositions.get(currentBlockIndex);
-                blockPos.getLocation().getBlock().setType(blockPos.getMaterial());
+                Block blockToPlace = blockPos.getLocation().getBlock();
+
+                if (blockToPlace.getType() != blockPos.getMaterial()) {
+                    blockToPlace.setType(blockPos.getMaterial());
+                }
                 currentBlockIndex++;
             }
         }.runTaskTimer(VitalCore.getPlugin(), 0L, ticksPerBlock); // Ejecutar cada "ticksPerBlock" ticks
 
         return true;
+    }
+
+    public boolean build(Location loc, Player player, RegionManager regionManager, StructureManager structureManager) {
+        return false;
     }
 
     private void executeBuildEffect(Location loc, Player player) {
@@ -278,7 +300,7 @@ public class Structure extends StructureRecipeHolder {
                 centerY / totalBlocks, centerZ / totalBlocks);
 
         if (this.requireFullDrop()) {
-            centerLocation.getWorld().dropItemNaturally(centerLocation, getItemStack());
+            centerLocation.getWorld().dropItemNaturally(centerLocation, this.getItemStack());
             return;
         }
 

@@ -1,8 +1,8 @@
 package me.winflix.vitalcore.general.utils;
 
-import java.util.Arrays;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +13,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
+import me.winflix.vitalcore.general.menu.Menu;
+import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -41,6 +43,21 @@ public class Utils {
         value = ChatColor.translateAlternateColorCodes('&', value);
 
         return value;
+    }
+
+    public static void openMenu(Player player, Class<? extends Menu> menu) {
+        if (menu == null) {
+            return;
+        }
+
+        try {
+            Constructor<? extends Menu> constructor = menu.getDeclaredConstructor(PlayerMenuUtility.class);
+            Menu instance = constructor.newInstance(VitalCore.getPlayerMenuUtility(player));
+            instance.open();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Location locationfromString(String locationString) {
@@ -99,28 +116,6 @@ public class Utils {
                     uuidString.substring(20);
         }
         return uuidString;
-    }
-
-    public static void sendClickableAction(Player player, ClickableMessage... message) {
-        List<ClickableMessage> messageList = Arrays.asList(message);
-        ComponentBuilder component = new ComponentBuilder();
-        messageList.forEach(m -> {
-            if (m != null) {
-                TextComponent current = new TextComponent(TextComponent
-                        .fromLegacyText(useColors(m.getMessage())));
-                if (m.getHoverMessage() != null) {
-                    current.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new Text(useColors(m.getHoverMessage()))));
-                }
-                if (m.getCommand() != null) {
-                    current.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + m.getCommand()));
-                } else {
-                    current.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, ""));
-                }
-                component.append(current);
-            }
-        });
-        player.spigot().sendMessage(component.create());
     }
 
     public static void sendConfirmationClickableMessage(Player target, String message, ClickableMessage confirm,

@@ -8,12 +8,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.general.menu.Menu;
-import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,15 +18,15 @@ import java.util.stream.Collectors;
 public class CommandManager implements TabExecutor {
 
     private ArrayList<SubCommand> subcommands = new ArrayList<>();
-    private Class<? extends Menu> menu;
+    private BaseCommand baseCommand;
 
-    public CommandManager(VitalCore plugin, ArrayList<SubCommand> commands, Class<? extends Menu> menu) {
-        for (SubCommand subCommand : commands) {
-            subcommands.add(subCommand);
-        }
-        this.menu = menu;
+    // Constructor que incluye comando base y menú
+    public CommandManager(VitalCore plugin, ArrayList<SubCommand> commands, BaseCommand baseCommand) {
+        subcommands.addAll(commands);
+        this.baseCommand = baseCommand;
     }
 
+    // Constructor original para compatibilidad si no se requiere comando base
     public CommandManager(VitalCore plugin, ArrayList<SubCommand> commands) {
         this(plugin, commands, null);
     }
@@ -38,33 +34,27 @@ public class CommandManager implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            return true; // No es un jugador, salimos
+            return true;
         }
 
         Player player = (Player) sender;
 
-        if (args.length == 0) {
-            openMenu(player);
-        } else {
+        if (subcommands.size() == 0 && baseCommand != null) {
+            if (!player.isOp()) {
+                if (baseCommand.getPermission() != null && !player.hasPermission(baseCommand.getPermission())) {
+                    Utils.errorMessage(player, "You don't have permission to use this command.");
+                    return true;
+                }
+            }
+            baseCommand.perform(player, args);
+            return true;
+        }
+
+        if (subcommands.size() > 0 && baseCommand == null && args.length >= 1) {
             executeSubcommand(player, args);
         }
 
         return true;
-    }
-
-    private void openMenu(Player player) {
-        if (menu == null) {
-            return;
-        }
-
-        try {
-            Constructor<? extends Menu> constructor = menu.getDeclaredConstructor(PlayerMenuUtility.class);
-            Menu instance = constructor.newInstance(VitalCore.getPlayerMenuUtility(player));
-            instance.open();
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
-                | InvocationTargetException e) {
-            e.printStackTrace();
-        }
     }
 
     private void executeSubcommand(Player player, String[] args) {

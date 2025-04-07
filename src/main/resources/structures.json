@@ -19,20 +19,18 @@
         },
         "matriz": [
             [
-                [null, "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", null],
-                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS","OAK_PLANKS"],
-                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS","OAK_PLANKS"],
-                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS","OAK_PLANKS"],
-                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS","OAK_PLANKS"],
-                [null, "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS","OAK_PLANKS", null]
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"]
             ],
             [
-                [null, "OAK_SLAB", "OAK_SLAB", "OAK_SLAB","OAK_SLAB", null],
-                ["OAK_SLAB", null, null, null, null,"OAK_SLAB"],
-                ["OAK_SLAB", null, null, null, null,"OAK_SLAB"],
-                ["OAK_SLAB", null, null, null, null,"OAK_SLAB"],
-                ["OAK_SLAB", null, null, null,null, "OAK_SLAB"],
-                [null, "OAK_SLAB", "OAK_SLAB","OAK_SLAB", "OAK_SLAB", null]
+                ["OAK_SLAB", "OAK_SLAB", "OAK_SLAB", "OAK_SLAB","OAK_SLAB"],
+                ["OAK_SLAB", null, null, null,"OAK_SLAB"],
+                ["OAK_SLAB", null, null, null,"OAK_SLAB"],
+                ["OAK_SLAB", null, null, null,"OAK_SLAB"],
+                ["OAK_SLAB", "OAK_SLAB", "OAK_SLAB","OAK_SLAB", "OAK_SLAB"]
             ]
         ],
         "id": "wooden_foundation"

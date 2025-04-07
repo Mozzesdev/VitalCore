@@ -20,9 +20,11 @@ import me.winflix.vitalcore.structures.utils.StructureManager;
 public class PlaceStructure implements Listener {
 
   RegionManager regionManager;
+  StructureManager structureManager;
 
-  public PlaceStructure(RegionManager regionManager) {
+  public PlaceStructure(RegionManager regionManager, StructureManager structureManager) {
     this.regionManager = regionManager;
+    this.structureManager = structureManager;
   }
 
   @EventHandler
@@ -51,10 +53,10 @@ public class PlaceStructure implements Listener {
             if (structure == null) {
               event.getPlayer().sendMessage(
                   Utils.useColors("&cError: No se pudo construir la estructura debido a datos inválidos."));
-              return; // Sale del método si la estructura es nula
+              return;
             }
 
-            boolean wasBuilded = structure.build(locToBuild, player, regionManager);
+            boolean wasBuilded = structure.build(locToBuild, player, regionManager, structureManager);
 
             if (player.getGameMode() == GameMode.SURVIVAL && wasBuilded) {
 

@@ -7,10 +7,15 @@ import java.io.IOException;
 public class SkinFetch {
     private final String value;
     private final String signature;
+    private final String id;
+    private final String name;
 
     public SkinFetch(String json) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(json);
+
+        this.id = rootNode.has("id") ? rootNode.get("id").asText() : null;
+        this.name = rootNode.has("name") ? rootNode.get("name").asText() : null;
 
         if (rootNode.has("properties")) {
             JsonNode propertiesNode = rootNode.get("properties");
@@ -38,8 +43,16 @@ public class SkinFetch {
         return signature;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     @Override
-    public String toString(){
+    public String toString() {
         return "SkinFetch [value="
                 + value
                 + ", signature=" + signature

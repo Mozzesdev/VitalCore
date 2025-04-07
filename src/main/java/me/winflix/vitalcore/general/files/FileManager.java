@@ -8,43 +8,41 @@ import java.util.stream.Collectors;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.general.database.collections.TribesCollection;
-import me.winflix.vitalcore.general.database.collections.UsersCollection;
+import me.winflix.vitalcore.core.files.MotdConfigFile;
+import me.winflix.vitalcore.general.database.collections.tribe.TribesDAO;
+import me.winflix.vitalcore.general.database.collections.tribe.UsersDAO;
 import me.winflix.vitalcore.general.utils.Utils;
-import me.winflix.vitalcore.structures.files.StructureFile;
-import me.winflix.vitalcore.tribe.files.UserFile;
-import me.winflix.vitalcore.tribe.files.TribeFile;
+import me.winflix.vitalcore.tribes.files.TribeFile;
+import me.winflix.vitalcore.tribes.files.UserFile;
 
 public class FileManager {
 
     private static final String TRIBES_FOLDER = "tribes";
     private static final String USERS_FOLDER = "users";
-    private static final String STRUCTURES_FOLDER = "structures";
-    private static final String MESSAGES_FILE_NAME = "en";
+    private static final String MESSAGES_FILE_NAME = "es";
     private static final String I18N_FOLDER = "i18n";
+
     public List<TribeFile> tribeFiles = new ArrayList<>();
     public List<UserFile> usersFiles = new ArrayList<>();
     public FileConfiguration configFile;
     public MessagesFile messagesFile;
-    public StructureFile structuresFile;
+    public MotdConfigFile motdConfigFile;
     public VitalCore plugin;
 
     public FileManager(VitalCore plugin) {
         this.plugin = plugin;
         configFile = plugin.getConfig();
-        setupFolders();
         setupConfigFile();
+        setupFolders();
         setupMessagesFiles();
-        setupStructuresFiles();
-        // setupTribesFiles();
-        // setupUsersFiles();
+        setupMotdFile();
         setPrefixes();
     }
 
     public void createFolder(String name) {
         File folder = new File(plugin.getDataFolder(), name);
         if (!folder.exists()) {
-            if (!folder.mkdir()) {
+            if (!folder.mkdirs()) {
                 plugin.getLogger().severe("No se pudo crear la carpeta: " + folder.getPath());
             }
         }
@@ -54,31 +52,26 @@ public class FileManager {
         createFolder(TRIBES_FOLDER);
         createFolder(USERS_FOLDER);
         createFolder(I18N_FOLDER);
-        createFolder(STRUCTURES_FOLDER);
-    }
-
-    public void setupStructuresFiles() {
-        structuresFile = new StructureFile(plugin, "structures", STRUCTURES_FOLDER);
     }
 
     public void setupTribesFiles() {
-        tribeFiles = TribesCollection.getAllTribes().stream()
-                .map(tribe -> {
-                    return new TribeFile(plugin, tribe.getId(), TRIBES_FOLDER, tribe);
-                })
+        tribeFiles = TribesDAO.getAllTribes().stream()
+                .map(tribe -> new TribeFile(plugin, tribe.getId().toString(), TRIBES_FOLDER, tribe))
                 .collect(Collectors.toList());
     }
 
     public void setupUsersFiles() {
-        usersFiles = UsersCollection.getAllUsers().stream()
-                .map(player -> {
-                    return new UserFile(plugin, player.getId(), USERS_FOLDER, player);
-                })
+        usersFiles = UsersDAO.getAllUsers().stream()
+                .map(player -> new UserFile(plugin, player.getId().toString(), USERS_FOLDER, player))
                 .collect(Collectors.toList());
     }
 
     public void setupMessagesFiles() {
         messagesFile = new MessagesFile(plugin, MESSAGES_FILE_NAME, I18N_FOLDER);
+    }
+
+    public void setupMotdFile() {
+        motdConfigFile = new MotdConfigFile(plugin);
     }
 
     public void setupConfigFile() {
@@ -91,16 +84,16 @@ public class FileManager {
         return messagesFile;
     }
 
+    public MotdConfigFile getMotdFile() {
+        return motdConfigFile;
+    }
+
     public FileConfiguration getConfigFile() {
         return configFile;
     }
 
     public List<TribeFile> getTribesFiles() {
         return tribeFiles;
-    }
-
-    public StructureFile getStructuresFile() {
-        return structuresFile;
     }
 
     public TribeFile getTribeFile(String id) {
@@ -123,10 +116,8 @@ public class FileManager {
 
     public void reloadAllFiles() {
         messagesFile.reloadConfig();
+        motdConfigFile.reloadConfig();
         plugin.reloadConfig();
-        structuresFile.reloadConfig();
-        // setupUsersFiles();
-        // setupTribesFiles();
         setPrefixes();
     }
 

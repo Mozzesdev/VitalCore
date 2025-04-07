@@ -2,10 +2,14 @@ package me.winflix.vitalcore.structures.region;
 
 import org.bukkit.Location;
 
-import java.util.List;
+import me.winflix.vitalcore.VitalCore;
 
+import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class RegionManager {
 
@@ -25,7 +29,10 @@ public class RegionManager {
     // Verificar si una ubicación está dentro de alguna región
     public boolean isInsideAnyRegion(Location loc) {
         for (Region region : regions.values()) {
-            if (region.contains(loc)) {
+            Optional<Location> existRegion = region.getLocations().stream().filter(l -> l.equals(loc)).findFirst();
+            if (existRegion.isPresent()) {
+                VitalCore.Log.info("Put location: " + loc.toString());
+                VitalCore.Log.info("Location found: " + existRegion.get().toString());
                 return true;
             }
         }
@@ -64,19 +71,35 @@ public class RegionManager {
                 .orElse(null); // Devuelve null si no se encuentra ninguna región
     }
 
-    public Region findAdjacentRegion(Location loc, double distance) {
+    public Set<Region> findAdjacentRegions(Location loc, double distance) {
+        Set<Region> adyacentRegions = new HashSet<>();
+
         // Recorre todas las regiones en el mapa
         for (Region region : regions.values()) {
             // Revisa todas las ubicaciones de la región
             for (Location regionLoc : region.getLocations()) {
                 // Comprueba si la distancia total es menor o igual a la distancia especificada
                 if (regionLoc.distance(loc) <= distance) {
-                    // Si se encuentra una región adyacente, devuélvela
+                    // Si se encuentra una región adyacente, agrégala
+                    adyacentRegions.add(region);
+                }
+            }
+        }
+
+        return adyacentRegions;
+    }
+
+    public Region findClosestRegion(Location loc, double distance, List<Region> regions) {
+        // Recorre todas las regiones en el mapa
+        for (Region region : regions) {
+            // Revisa todas las ubicaciones de la región
+            for (Location regionLoc : region.getLocations()) {
+                // Comprueba si la distancia total es menor o igual a la distancia especificada
+                if (regionLoc.distance(loc) <= distance) {
                     return region;
                 }
             }
         }
-        // Si no se encontró ninguna región adyacente, devuelve null
         return null;
     }
 

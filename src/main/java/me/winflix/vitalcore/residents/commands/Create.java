@@ -149,7 +149,7 @@ public class Create extends SubCommand {
                 }
             } else if (args[i].equalsIgnoreCase("--skin")) {
                 if (i + 1 < args.length) {
-                    propertySkin = SkinGrabber.fetchSkinByName(args[i + 1]);
+                    propertySkin = SkinGrabber.fetchSkinByName(args[i + 1]).getProperty();
                     flagsFound.add("--skin");
                 } else {
                     Utils.errorMessage(sender,
@@ -162,7 +162,7 @@ public class Create extends SubCommand {
         npc.spawn();
 
         if (!flagsFound.contains("--skin")) {
-            propertySkin = SkinGrabber.fetchSkinByName(npcName);
+            propertySkin = SkinGrabber.fetchSkinByName(npcName).getProperty();
         }
 
         if (propertySkin != null) {
@@ -185,9 +185,11 @@ public class Create extends SubCommand {
     }
 
     private String formatCoordinates(Location loc) {
-        return Utils.useColors(" &b[" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ", "+ loc.getWorld().getName() + "] ");
+        return Utils.useColors(" &b[" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ", "
+                + loc.getWorld().getName() + "] ");
     }
 
+    @SuppressWarnings("deprecation")
     private TextComponent createCoordinatesComponent(Location loc) {
         String formattedCoordinates = formatCoordinates(loc);
 

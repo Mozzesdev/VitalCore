@@ -3,7 +3,6 @@ package me.winflix.vitalcore.structures.models;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -19,20 +18,29 @@ import org.bukkit.persistence.PersistentDataType;
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.structures.interfaces.StructuresType;
-import me.winflix.vitalcore.structures.region.Region;
 import me.winflix.vitalcore.structures.region.RegionManager;
 import me.winflix.vitalcore.structures.region.StructureRegion;
-import me.winflix.vitalcore.structures.utils.StructureBlockPosition;
 import me.winflix.vitalcore.structures.utils.StructureManager;
 import net.minecraft.core.Direction;
 
 public class Foundation extends Structure {
+
+    Material[][][] stackedMatriz = null;
+    boolean isStacked = false;
 
     public Foundation(String name, float health, StructureItem item, Material[][][] blocks, String id,
             Recipe rawRecipe) {
         super(name, StructuresType.FOUNDATION, health, blocks, id, item);
         this.rawRecipe = rawRecipe;
         this.shapedRecipe = new ShapedRecipe(new NamespacedKey(VitalCore.getPlugin(), id), getItemStack());
+    }
+
+    public boolean isStacked() {
+        return isStacked;
+    }
+
+    public void setStacked(boolean isStacked) {
+        this.isStacked = isStacked;
     }
 
     public Foundation(String name, float health, StructureItem item, Material[][][] blocks, String id) {
@@ -44,8 +52,7 @@ public class Foundation extends Structure {
     }
 
     public List<Location> getBlockLocations(Location loc) {
-        Location locationFoundation = loc.subtract(0, 1, 0); // Ajusta la ubicación para fundaciones
-        List<Location> baseLocations = super.getBlockLocations(locationFoundation);
+        List<Location> baseLocations = super.getBlockLocations(loc);
 
         // Ajustar las ubicaciones para considerar una altura de -4 a 4 alrededor del
         // centro
@@ -60,8 +67,11 @@ public class Foundation extends Structure {
     }
 
     @Override
-    public boolean build(Location location, Player player, RegionManager regionManager) {
-        List<Location> blockLocations = getBlockLocations(location);
+    public boolean build(Location location, Player player, RegionManager regionManager,
+            StructureManager structureManager) {
+
+        // Ajusta la ubicación para fundaciones
+        location.subtract(0, 1, 0);
 
         // Verifica si ya hay una fundación en la región antes de construir
         if (regionManager.isInsideAnyRegion(location)) {
@@ -69,25 +79,13 @@ public class Foundation extends Structure {
             return false;
         }
 
-        double distance = StructureManager.getStructureBorderDistance(matriz);
-
-        Region adyacentRegion = regionManager.findAdjacentRegion(location, distance + 1);
-
-        if (adyacentRegion instanceof StructureRegion && adyacentRegion != null) {
-
-            Structure adyacentStructure = ((StructureRegion) adyacentRegion).getStructure();
-            Direction direction = getBuildDirection(location, adyacentStructure);
-
-            player.sendMessage(adyacentStructure.getName());
-            player.sendMessage(direction.getName());
-
-            return true;
-        }
-
-        if (super.build(location, player, regionManager)) {
+        // Construcción en la ubicación final determinada
+        if (super.build(location, player)) {
+            // Lógica adicional tras la construcción exitosa
+            List<Location> blockLocations = getBlockLocations(buildLocation);
             String regionId = UUID.randomUUID().toString();
-            StructureRegion newRegion = new StructureRegion(regionId, player.getUniqueId().toString(),
-                    blockLocations,
+
+            StructureRegion newRegion = new StructureRegion(regionId, player.getUniqueId().toString(), blockLocations,
                     this);
             regionManager.addRegion(regionId, newRegion);
 
@@ -97,74 +95,51 @@ public class Foundation extends Structure {
         return false;
     }
 
-    private Direction getBuildDirection(Location buildLocation, Structure adjacentStructure) {
-        List<Location> adjacentBlockPositions = adjacentStructure.getBlockPositions().stream()
-                .map(StructureBlockPosition::getLocation)
-                .collect(Collectors.toList());
-
-        // Encuentra el borde más cercano de la estructura adyacente
-        Location closestEdge = findClosestEdge(buildLocation, adjacentBlockPositions);
-
-        if (closestEdge != null) {
-            VitalCore.Log.info(closestEdge.toString());
-
-            // Compara las diferencias de coordenadas
-            double diffX = buildLocation.getX() - closestEdge.getX();
-            double diffZ = buildLocation.getZ() - closestEdge.getZ();
-
-            // Si no es diagonal, sigue con la lógica normal
-            if (Math.abs(diffX) > Math.abs(diffZ)) {
-                // La diferencia en X es mayor, entonces es ESTE u OESTE
-                return (diffX > 0) ? Direction.EAST : Direction.WEST;
-            } else {
-                // La diferencia en Z es mayor, entonces es NORTE o SUR
-                return (diffZ > 0) ? Direction.SOUTH : Direction.NORTH;
-            }
-        }
-        return null;
-    }
-
-    // Encuentra el borde más cercano de la estructura adyacente
-    private Location findClosestEdge(Location buildLocation, List<Location> blockPositions) {
-        Location closest = null;
-        double closestAlignment = Double.MAX_VALUE;
-
-        for (Location pos : blockPositions) {
-            double diffX = Math.abs(buildLocation.getX() - pos.getX());
-            double diffZ = Math.abs(buildLocation.getZ() - pos.getZ());
-
-            // Si las X o Z están alineadas, damos prioridad a esa alineación
-            if (buildLocation.getX() == pos.getX()) {
-                // Si las X coinciden, solo comparamos las Z
-                if (diffZ < closestAlignment) {
-                    closestAlignment = diffZ;
-                    closest = pos;
-                }
-            } else if (buildLocation.getZ() == pos.getZ()) {
-                // Si las Z coinciden, solo comparamos las X
-                if (diffX < closestAlignment) {
-                    closestAlignment = diffX;
-                    closest = pos;
-                }
-            } else {
-                // Si no están alineados ni en X ni en Z, usamos la suma de diferencias
-                double totalDiff = diffX + diffZ;
-                if (totalDiff < closestAlignment) {
-                    closestAlignment = totalDiff;
-                    closest = pos;
-                }
-            }
+    public void updateMatriz(Direction direction, StructureManager manager) {
+        if (!isStacked || direction == null) {
+            this.matriz = manager.getStructureById(id).getMatriz();
+            return;
         }
 
-        return closest;
+        Material[][] secondLayer = this.matriz[1];
+
+        switch (direction) {
+            case WEST:
+                for (int i = 1; i < secondLayer.length - 1; i++) {
+                    secondLayer[i][secondLayer[0].length - 1] = Material.AIR;
+                }
+                break;
+
+            case EAST:
+                for (int i = 1; i < secondLayer.length - 1; i++) {
+                    secondLayer[i][0] = Material.AIR;
+                }
+                break;
+
+            case SOUTH:
+                for (int i = 1; i < secondLayer[0].length - 1; i++) {
+                    secondLayer[0][i] = Material.AIR;
+                }
+                break;
+
+            case NORTH:
+                for (int i = 1; i < secondLayer[0].length - 1; i++) {
+                    secondLayer[secondLayer.length - 1][i] = Material.AIR;
+                }
+                break;
+            default:
+                break;
+        }
+
+        this.matriz[1] = secondLayer;
     }
 
     public void destroy(Player player, RegionManager regionManager, String regionId) {
         super.destroy();
 
         if (player.getGameMode() == GameMode.SURVIVAL) {
+            dropItem();
         }
-        dropItem();
 
         // Elimina la región asociada
         regionManager.removeRegion(regionId);
@@ -172,23 +147,33 @@ public class Foundation extends Structure {
 
     @Override
     public ItemStack getItemStack() {
-        ItemStack itemStack = item.toItemStack();
+        if (item != null) {
+            ItemStack itemStack = item.toItemStack();
 
-        ItemMeta meta = itemStack.getItemMeta();
+            ItemMeta meta = itemStack.getItemMeta();
 
-        // Usando PersistentDataContainer en lugar de NMS
-        NamespacedKey keyData = new NamespacedKey("yourplugin", "structure_data");
-        NamespacedKey keyItem = new NamespacedKey("yourplugin", "item_type");
+            // Usando PersistentDataContainer en lugar de NMS
+            NamespacedKey keyData = new NamespacedKey("yourplugin", "structure_data");
+            NamespacedKey keyItem = new NamespacedKey("yourplugin", "item_type");
 
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        String structureJson = StructureManager.toJson(this);
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
-        pdc.set(keyData, PersistentDataType.STRING, structureJson);
-        pdc.set(keyItem, PersistentDataType.STRING, "structure_item");
+            Foundation foundation = this;
+            foundation.setBlockPositions(new ArrayList<>());
+            foundation.setBuildLocation(null);
+            foundation.setFace(null);
 
-        itemStack.setItemMeta(meta);
+            String structureJson = StructureManager.toJson(foundation);
 
-        return itemStack;
+            pdc.set(keyData, PersistentDataType.STRING, structureJson);
+            pdc.set(keyItem, PersistentDataType.STRING, "structure_item");
+
+            itemStack.setItemMeta(meta);
+
+            return itemStack;
+        }
+
+        return null;
     }
 
     @Override
