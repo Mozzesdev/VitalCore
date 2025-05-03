@@ -1,5 +1,5 @@
 prefixes:
-  error: "&7[&6${plugin}&7] ->&c "
+  error: "&7[&c${plugin}&7] ->&c "
   success: "&7[&a${plugin}&7] ->&a "
   info: "&8[&7${plugin}&8] ->&7 "
 tribes:
@@ -92,3 +92,24 @@ general:
   commands:
     unknown: "Comando desconocido o sin permisos suficientes."
     syntax: "&bError de sintaxis: usa ${cm:syntax}"
+antibot:
+  join:
+    blocked: "&ePor seguridad, debes moverte antes de usar el chat o comandos."
+  move:
+    success: "Movimiento detectado. Ya puedes chatear y usar comandos."
+  command:
+    fail: "Debes moverte antes de usar comandos."
+  chat:
+    fail: "Debes moverte antes de hablar en el chat."
+chat:
+  advertising:
+    blocked: "&cNo puedes hacer publicidad a otros servidores."
+    private-blocked: "&cNo puedes enviar mensajes con publicidad."
+    command-blocked: "&cNo puedes usar publicidad en comandos."
+    sign-blocked: "&cNo puedes colocar letreros con publicidad."
+    staff-notify: "&e${player:name} &cha intentado hacer publicidad."
+  mention:
+    title: "&c{sender} &ete ha mencionado en el chat!"
+  private:
+    from: "&a[Privado de {sender}]: "
+    to: "&a[Privado a {receiver}]: "

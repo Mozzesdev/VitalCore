@@ -1,5 +1,5 @@
 prefixes:
-  error: "&7[&6${plugin}&7] ->&c "
+  error: "&7[&c${plugin}&7] ->&c "
   success: "&7[&a${plugin}&7] ->&a "
   info: "&8[&7${plugin}&8] ->&7 "
 tribes:
@@ -78,3 +78,24 @@ general:
   commands:
     unknown: "Unknown command or insufficient permissions."
     syntax: "&bSyntax error: use ${cm:syntax}"
+antibot:
+  join:
+    blocked: "&eFor security, you must move before chatting or using commands."
+  move:
+    success: "Motion detected. You can now chat and use commands."
+  command:
+    fail: "You must move before using commands."
+  chat:
+    fail: "You must move before speaking in the chat."
+chat:
+  advertising:
+    blocked: "&cYou can't advertise other servers."
+    private-blocked: "&cYou can't send messages with advertisements."
+    command-blocked: "&cYou can't use advertisements in commands."
+    sign-blocked: "&cYou can't place signs with advertisements."
+    staff-notify: "&e${player:name} &cattempted to advertise."
+  mention:
+    title: "&e&c{sender} &ehas mentioned you in the chat!"
+  private:
+    from: "&a[Private from {sender}]: "
+    to: "&a[Private to {receiver}]: "

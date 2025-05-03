@@ -1,10 +1,10 @@
 package me.winflix.vitalcore.skins.files;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.bukkit.configuration.ConfigurationSection;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.files.YmlFile;
@@ -13,55 +13,55 @@ import me.winflix.vitalcore.skins.models.Skin;
 public class SkinFile extends YmlFile {
     private Skin skin;
 
-    public SkinFile(VitalCore plugin, String fileName, String folder, Skin skin) {
-        super(plugin, fileName, folder);
+    /**
+     * @param plugin   Referencia al plugin
+     * @param fileName Nombre del archivo (se le añade .yml si no lo lleva)
+     * @param skin     Objeto Skin a serializar
+     */
+    public SkinFile(VitalCore plugin, String fileName, Skin skin) {
+        // Carpeta "skins", produce e.g. dataFolder/skins/<fileName>.yml
+        super(plugin, fileName, "skins");
         this.skin = skin;
-        create();
+        create(); // copia recurso (si existe), recarga config y llama onCreate()
     }
 
+    /**
+     * Hook que se ejecuta justo tras crear/cargar el archivo.
+     * Aquí volcaremos los datos del Skin a la config.
+     */
     @Override
-    public void create() {
-        File file = new File(getPath());
-
-        File parentDir = file.getParentFile();
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();
-        }
-
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-                reloadConfig();
-                updateSkinData();
-            } catch (IOException e) {
-                VitalCore.Log.severe("No se pudo crear el archivo: " + file.getPath());
-                e.printStackTrace();
-            }
-        }
-
+    protected void onCreate() {
+        updateSkinData();
     }
 
+    /**
+     * Serializa el objeto Skin en el YamlConfiguration y guarda.
+     */
     public void updateSkinData() {
-        // Serializar el Skin al YamlConfiguration
         getConfig().set("skin.ownerId", skin.getOwnerId().toString());
         getConfig().set("skin.ownerName", skin.getOwnerName());
-        getConfig().set("skin.property", skin.getPropertyAsMap());
-
+        getConfig().createSection("skin.property", skin.getPropertyAsMap());
         saveConfig();
     }
 
+    /**
+     * Carga desde el YML un nuevo Skin.
+     */
     public Skin loadSkin() {
-        Map<String, String> propertyMap = getConfig().getConfigurationSection("skin.property")
-                .getValues(false)
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().toString()));
+        ConfigurationSection propSection = getConfig().getConfigurationSection("skin.property");
+        Map<String, String> propertyMap = propSection == null
+                ? Map.of()
+                : propSection.getValues(false)
+                        .entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> e.getValue().toString()));
 
-        return new Skin(
-                UUID.fromString(getConfig().getString("skin.ownerId")),
-                getConfig().getString("skin.ownerName"),
-                Skin.propertyFromMap(propertyMap));
+        UUID ownerId = UUID.fromString(getConfig().getString("skin.ownerId", UUID.randomUUID().toString()));
+        String ownerName = getConfig().getString("skin.ownerName", "Unknown");
+
+        return new Skin(ownerId, ownerName, Skin.propertyFromMap(propertyMap));
     }
+
 }

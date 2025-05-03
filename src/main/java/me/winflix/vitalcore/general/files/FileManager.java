@@ -6,37 +6,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
+import me.winflix.vitalcore.addons.config.ChestConfig;
 import me.winflix.vitalcore.core.files.MotdConfigFile;
+import me.winflix.vitalcore.core.files.WorldConfigFile;
+import me.winflix.vitalcore.core.managers.LocaleManager;
 import me.winflix.vitalcore.general.database.collections.tribe.TribesDAO;
 import me.winflix.vitalcore.general.database.collections.tribe.UsersDAO;
-import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.tribes.files.TribeFile;
 import me.winflix.vitalcore.tribes.files.UserFile;
 
 public class FileManager {
-
-    private static final String TRIBES_FOLDER = "tribes";
-    private static final String USERS_FOLDER = "users";
-    private static final String MESSAGES_FILE_NAME = "es";
-    private static final String I18N_FOLDER = "i18n";
-
     public List<TribeFile> tribeFiles = new ArrayList<>();
     public List<UserFile> usersFiles = new ArrayList<>();
     public FileConfiguration configFile;
-    public MessagesFile messagesFile;
+    private final LocaleManager localeManager;
     public MotdConfigFile motdConfigFile;
+    public WorldConfigFile worldConfigFile;
+    public ChestConfig chestsConfig;
     public VitalCore plugin;
 
     public FileManager(VitalCore plugin) {
         this.plugin = plugin;
         configFile = plugin.getConfig();
+        this.localeManager = new LocaleManager(plugin);
         setupConfigFile();
-        setupFolders();
-        setupMessagesFiles();
         setupMotdFile();
-        setPrefixes();
+        setupWorldConfig();
+        setupAddonsFiles();
     }
 
     public void createFolder(String name) {
@@ -48,30 +47,40 @@ public class FileManager {
         }
     }
 
-    public void setupFolders() {
-        createFolder(TRIBES_FOLDER);
-        createFolder(USERS_FOLDER);
-        createFolder(I18N_FOLDER);
-    }
-
     public void setupTribesFiles() {
         tribeFiles = TribesDAO.getAllTribes().stream()
-                .map(tribe -> new TribeFile(plugin, tribe.getId().toString(), TRIBES_FOLDER, tribe))
+                .map(tribe -> new TribeFile(plugin, tribe.getId().toString(), tribe))
                 .collect(Collectors.toList());
     }
 
     public void setupUsersFiles() {
         usersFiles = UsersDAO.getAllUsers().stream()
-                .map(player -> new UserFile(plugin, player.getId().toString(), USERS_FOLDER, player))
+                .map(player -> new UserFile(plugin, player.getId().toString(), player))
                 .collect(Collectors.toList());
-    }
-
-    public void setupMessagesFiles() {
-        messagesFile = new MessagesFile(plugin, MESSAGES_FILE_NAME, I18N_FOLDER);
     }
 
     public void setupMotdFile() {
         motdConfigFile = new MotdConfigFile(plugin);
+    }
+
+    public void setupWorldConfig() {
+        worldConfigFile = new WorldConfigFile(plugin);
+    }
+
+    private void setupAddonsFiles(){
+        chestsConfig = new ChestConfig(plugin);
+    } 
+
+    public ChestConfig getChestsConfig() {
+        return chestsConfig;
+    }
+
+    public FileConfiguration getWorldsConfig() {
+        return worldConfigFile.getConfig();
+    }
+
+    public void saveWorldsConfig() {
+        worldConfigFile.saveConfig();
     }
 
     public void setupConfigFile() {
@@ -80,8 +89,8 @@ public class FileManager {
         plugin.saveConfig();
     }
 
-    public MessagesFile getMessagesFile() {
-        return messagesFile;
+    public MessagesFile getMessagesFile(Player player) {
+        return localeManager.getMessagesFile(player);
     }
 
     public MotdConfigFile getMotdFile() {
@@ -115,16 +124,10 @@ public class FileManager {
     }
 
     public void reloadAllFiles() {
-        messagesFile.reloadConfig();
+        localeManager.reloadAllLocales();
         motdConfigFile.reloadConfig();
+        chestsConfig.reloadConfig();
         plugin.reloadConfig();
-        setPrefixes();
     }
 
-    public void setPrefixes() {
-        FileConfiguration messagesConfig = getMessagesFile().getConfig();
-        Utils.ERROR_PREFIX = messagesConfig.getString("prefixes.error");
-        Utils.INFO_PREFIX = messagesConfig.getString("prefixes.info");
-        Utils.SUCCESS_PREFIX = messagesConfig.getString("prefixes.success");
-    }
 }

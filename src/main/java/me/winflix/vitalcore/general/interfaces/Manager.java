@@ -22,4 +22,6 @@ public abstract class Manager {
         return plugin;
     };
 
+    public abstract void onDisable();
+
 }

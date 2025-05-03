@@ -36,12 +36,12 @@ public class Kick extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command kick a player or players to your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe kick <player>";
     }
 
@@ -55,7 +55,7 @@ public class Kick extends SubCommand {
     public void perform(Player sender, String[] args) {
         // Verificar la cantidad de argumentos
         if (args.length <= 1) {
-            Utils.errorMessage(sender, "Syntax error: use " + getSyntax());
+            Utils.errorMessage(sender, "Syntax error: use " + getSyntax(sender));
             return;
         }
 
@@ -110,7 +110,7 @@ public class Kick extends SubCommand {
         // Crear el menú de confirmación
         ConfirmMenu confirmMenu = new ConfirmMenu(
                 sender,
-                VitalCore.fileManager.getMessagesFile().getConfig(),
+                VitalCore.fileManager.getMessagesFile(sender).getConfig(),
                 confirmMessages,
                 menuName);
 

@@ -24,12 +24,12 @@ public class Delete extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "tribes.commands.delete.description";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe delete <tribe_name>";
     }
 

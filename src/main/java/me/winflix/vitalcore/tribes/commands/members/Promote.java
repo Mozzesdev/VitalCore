@@ -36,12 +36,12 @@ public class Promote extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command invite a player or players to your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe promote <player> <rankname>";
     }
 
@@ -55,7 +55,7 @@ public class Promote extends SubCommand {
     public void perform(Player sender, String[] args) {
         // Validar la cantidad de argumentos
         if (args.length <= 2) {
-            Utils.errorMessage(sender, "Syntax error: use " + getSyntax());
+            Utils.errorMessage(sender, "Syntax error: use " + getSyntax(sender));
             return;
         }
 
@@ -124,7 +124,7 @@ public class Promote extends SubCommand {
         // Instanciar el menu de confirmacion
         ConfirmMenu confirmMenu = new ConfirmMenu(
                 sender,
-                VitalCore.fileManager.getMessagesFile().getConfig(),
+                VitalCore.fileManager.getMessagesFile(sender).getConfig(),
                 confirmMessages,
                 titleMenu);
 

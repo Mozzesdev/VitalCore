@@ -1,3 +1,5 @@
 plugin: VitalCore
 tribe:
   allow_yaml: true
+antibot:
+  allow: true

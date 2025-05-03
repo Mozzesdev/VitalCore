@@ -59,6 +59,7 @@ public class Structures extends Manager {
         strCommands.add(new Get(structureManager));
     }
 
-    public void onDisable(Plugin plugin) {
+    @Override
+    public void onDisable() {
     }
 }

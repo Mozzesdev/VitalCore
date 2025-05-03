@@ -28,12 +28,12 @@ public class Menu extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command open a complete menu of your tribe";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe menu";
     }
 

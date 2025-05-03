@@ -28,12 +28,12 @@ public class Reload extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command save the home of your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/vcore reload";
     }
 
@@ -46,7 +46,7 @@ public class Reload extends SubCommand {
     public void perform(Player p, String[] args) {
         FileManager fileManager = VitalCore.fileManager;
         fileManager.reloadAllFiles();
-        FileConfiguration messageFile = fileManager.getMessagesFile().getConfig();
+        FileConfiguration messageFile = fileManager.getMessagesFile(p).getConfig();
         String message = messageFile.getString("reload");
         Utils.successMessage(p, message);
     }

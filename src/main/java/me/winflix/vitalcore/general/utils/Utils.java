@@ -10,7 +10,10 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.menu.Menu;
@@ -118,6 +121,7 @@ public class Utils {
         return uuidString;
     }
 
+    @SuppressWarnings("deprecation")
     public static void sendConfirmationClickableMessage(Player target, String message, ClickableMessage confirm,
             ClickableMessage reject) {
         ComponentBuilder component = new ComponentBuilder();
@@ -151,6 +155,45 @@ public class Utils {
         }
 
         target.spigot().sendMessage(component.create());
+    }
+
+    /**
+     * Spawnea un ítem flotante en la posición dada.
+     *
+     * @param worldName nombre del mundo (por ejemplo "world")
+     * @param x         coordenada X
+     * @param y         coordenada Y
+     * @param z         coordenada Z
+     * @param stack     el ItemStack a mostrar
+     */
+    public static Item spawnFloatingItem(Location location, ItemStack stack) {
+        return location.getWorld().spawn(location, Item.class, item -> {
+            item.setItemStack(stack);
+            // Desactivar gravedad para que no caiga
+            item.setGravity(false);
+            // Velocidad cero para que no se desplace
+            item.setVelocity(new Vector(0, 0, 0));
+            // Opcional: que no se pueda recoger
+            item.setPickupDelay(Integer.MAX_VALUE);
+            // Opcional: que no pueda romperse o recibir daño
+            item.setInvulnerable(true);
+        });
+    }
+
+    public static void removeFloatingItem(Item item) {
+        if (item != null && !item.isDead()) {
+            item.remove(); // elimina la entidad del mundo
+        }
+    }
+
+    public static byte[] hexToBytes(String hex) {
+        int len = hex.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                                 + Character.digit(hex.charAt(i+1), 16));
+        }
+        return data;
     }
 
 }

@@ -34,13 +34,13 @@ public class Create extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
-        return VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.cmd.desc");
+    public String getDescription(Player p) {
+        return VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.cmd.desc");
     }
 
     @Override
-    public String getSyntax() {
-        return VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.cmd.usage");
+    public String getSyntax(Player p) {
+        return VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.cmd.usage");
     }
 
     @Override
@@ -51,10 +51,10 @@ public class Create extends SubCommand {
     @Override
     public void perform(Player p, String[] args) {
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax());
+        placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax(p));
 
         if (args.length < 2) {
-            String syntaxMessage = VitalCore.fileManager.getMessagesFile().getConfig()
+            String syntaxMessage = VitalCore.fileManager.getMessagesFile(p).getConfig()
                     .getString("general.commands.syntax");
             String finalMessage = Placeholders.replacePlaceholders(syntaxMessage, placeholders);
             Utils.errorMessage(p, finalMessage);
@@ -65,7 +65,7 @@ public class Create extends SubCommand {
 
         if (user.getTribe() != null) {
             Utils.errorMessage(p,
-                    VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.already_in_tribe"));
+                    VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.already_in_tribe"));
             return;
         }
 
@@ -74,7 +74,7 @@ public class Create extends SubCommand {
 
         if (!isValidTribeName(tribeName)) {
             Utils.errorMessage(p,
-                    VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.invalid_name")
+                    VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.invalid_name")
                             .replace("{min}", "3")
                             .replace("{max}", "16"));
             return;
@@ -82,7 +82,7 @@ public class Create extends SubCommand {
 
         if (!tribeTag.isEmpty() && !isValidTag(tribeTag)) {
             Utils.errorMessage(p,
-                    VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.invalid_tag")
+                    VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.invalid_tag")
                             .replace("{min}", "2")
                             .replace("{max}", "5"));
             return;
@@ -91,7 +91,7 @@ public class Create extends SubCommand {
         // Verificar nombre único
         if (TribesDAO.getTribeByName(tribeName) != null) {
             Utils.errorMessage(p,
-                    VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.name_taken"));
+                    VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.name_taken"));
             return;
         }
 
@@ -102,12 +102,13 @@ public class Create extends SubCommand {
             UsersDAO.saveUser(user);
 
             Utils.successMessage(p,
-                    VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.success")
+                    VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.success")
                             .replace("{tribe_name}", tribeName));
 
         } catch (Exception e) {
             VitalCore.Log.log(Level.SEVERE, "Error creating tribe", e);
-            Utils.errorMessage(p, VitalCore.fileManager.getMessagesFile().getConfig().getString("tribes.create.error"));
+            Utils.errorMessage(p,
+                    VitalCore.fileManager.getMessagesFile(p).getConfig().getString("tribes.create.error"));
         }
     }
 

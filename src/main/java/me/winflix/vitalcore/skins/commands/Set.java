@@ -35,7 +35,7 @@ public class Set extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "Cambia tu skin";
     }
 
@@ -45,7 +45,7 @@ public class Set extends SubCommand {
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/skin set <nombre | uuid>";
     }
 
@@ -57,8 +57,8 @@ public class Set extends SubCommand {
     @Override
     public void perform(Player p, String[] args) {
         Map<String, String> placeholders = new HashMap<>();
-        FileConfiguration messageFile = VitalCore.fileManager.getMessagesFile().getConfig();
-        placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax());
+        FileConfiguration messageFile = VitalCore.fileManager.getMessagesFile(p).getConfig();
+        placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax(p));
 
         // Verificar la cantidad de argumentos
         if (args.length != 2) {
@@ -72,6 +72,7 @@ public class Set extends SubCommand {
 
         if (skin == null) {
             Utils.errorMessage(p, "Error al cambiar la skin. ¿El nombre/UUID es válido?");
+            return;
         }
 
         skinManager.updateSkin(p, skin);

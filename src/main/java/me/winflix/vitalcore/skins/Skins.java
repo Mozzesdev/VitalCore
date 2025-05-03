@@ -42,4 +42,8 @@ public class Skins extends Manager {
     public void registerCommands() {
         skinsCommands.add(new Set(skinManager));
     }
+
+    @Override
+    public void onDisable() {
+    }
 }

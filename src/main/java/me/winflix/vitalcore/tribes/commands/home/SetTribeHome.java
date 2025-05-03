@@ -30,12 +30,12 @@ public class SetTribeHome extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command save the home of your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe sethome";
     }
 
@@ -51,7 +51,7 @@ public class SetTribeHome extends SubCommand {
         String world = loc.getWorld().getName();
 
         // Obtener la configuración de mensajes
-        FileConfiguration messageFile = VitalCore.fileManager.getMessagesFile().getConfig();
+        FileConfiguration messageFile = VitalCore.fileManager.getMessagesFile(p).getConfig();
         String successMessage = messageFile.getString("tribes.homes.add.success");
         String restrictedMessage = messageFile.getString("tribes.homes.add.restricted");
 

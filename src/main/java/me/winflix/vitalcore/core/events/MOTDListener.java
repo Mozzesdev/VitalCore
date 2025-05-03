@@ -36,6 +36,7 @@ public class MOTDListener implements Listener {
                     event.setServerIcon(Bukkit.loadServerIcon(image));
                 }
             } catch (Exception e) {
+                Bukkit.getLogger().info(e.getLocalizedMessage());
                 Bukkit.getLogger().warning("No se pudo cargar el ícono del servidor: " + iconFile.getName());
             }
         }

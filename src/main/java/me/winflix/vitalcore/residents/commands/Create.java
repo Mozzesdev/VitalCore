@@ -37,7 +37,7 @@ public class Create extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player P) {
         return "Create a NPC";
     }
 
@@ -47,7 +47,7 @@ public class Create extends SubCommand {
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player P) {
         return "npc create [name] --look";
     }
 

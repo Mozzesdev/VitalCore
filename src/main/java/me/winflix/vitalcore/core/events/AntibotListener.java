@@ -1,4 +1,4 @@
-package me.winflix.vitalcore.core.managers;
+package me.winflix.vitalcore.core.events;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,52 +12,61 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.utils.Utils;
 
-public class AntiBotManager implements Listener {
+public class AntibotListener implements Listener {
 
     private final Set<Player> blockedPlayers = new HashSet<>();
-    private final int minPlayersToActivate = 10;
+    private final int minPlayersToActivate = 1;
     private final boolean isEnabled = true;
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (!isEnabled)
-            return;
+        if (!isEnabled) return;
 
         if (Bukkit.getOnlinePlayers().size() >= minPlayersToActivate) {
-            blockedPlayers.add(event.getPlayer());
-            Utils.infoMessage(event.getPlayer(), "&ePor seguridad, debes moverte antes de usar el chat o comandos.");
+            Player player = event.getPlayer();
+            blockedPlayers.add(player);
+
+            String message = VitalCore.fileManager.getMessagesFile(player).getConfig()
+                    .getString("antibot.join.blocked");
+            Utils.infoMessage(player, message);
         }
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (!blockedPlayers.contains(player))
-            return;
+        if (!isBlocked(player)) return;
 
         if (!event.getFrom().toVector().equals(event.getTo().toVector())) {
             blockedPlayers.remove(player);
-            Utils.successMessage(player, "&aMovimiento detectado. Ya puedes chatear y usar comandos.");
+            String message = VitalCore.fileManager.getMessagesFile(player).getConfig()
+                    .getString("antibot.move.success");
+            Utils.successMessage(player, message);
         }
     }
 
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
-        if (blockedPlayers.contains(player)) {
+        if (isBlocked(player)) {
             event.setCancelled(true);
-            Utils.errorMessage(player, "&cDebes moverte antes de usar comandos.");
+            String message = VitalCore.fileManager.getMessagesFile(player).getConfig()
+                    .getString("antibot.command.fail");
+            Utils.errorMessage(player, message);
         }
     }
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        if (blockedPlayers.contains(player)) {
+        if (isBlocked(player)) {
             event.setCancelled(true);
-            Utils.errorMessage(player, "&cDebes moverte antes de hablar en el chat.");
+            String message = VitalCore.fileManager.getMessagesFile(player).getConfig()
+                    .getString("antibot.chat.fail");
+            Utils.errorMessage(player, message);
         }
     }
 

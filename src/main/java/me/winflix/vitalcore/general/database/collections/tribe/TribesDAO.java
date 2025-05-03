@@ -57,7 +57,7 @@ public class TribesDAO {
         Connection conn = null;
         try {
             conn = Database.getConnection();
-            conn.setAutoCommit(false);  // Inicio de transacción
+            conn.setAutoCommit(false); // Inicio de transacción
 
             // 1. Insertar tribu
             String insertTribe = """
@@ -75,24 +75,24 @@ public class TribesDAO {
             // 2. Crear rangos iniciales
             for (Rank defaultRank : RankManager.DEFAULT_RANKS) {
                 defaultRank.setTribeId(tribeId);
-                RanksDAO.createRank(defaultRank, conn);  // Conexión compartida
+                RanksDAO.createRank(defaultRank, conn); // Conexión compartida
             }
 
             // 3. Guardar miembro
             TribeMembersDAO.createTribeMember(owner, conn);
 
-            conn.commit();  // Confirmar transacción
+            conn.commit(); // Confirmar transacción
 
             // 4. Crear archivo YAML
             if (VitalCore.fileManager.getConfigFile().getBoolean("tribe.allow_yaml")) {
-                TribeFile tribeFile = new TribeFile(plugin, tribeId.toString(), "tribes", tribe);
+                TribeFile tribeFile = new TribeFile(plugin, tribeId.toString(), tribe);
                 VitalCore.fileManager.getTribesFiles().add(tribeFile);
             }
 
         } catch (SQLException e) {
             if (conn != null) {
                 try {
-                    conn.rollback();  // Rollback en caso de error
+                    conn.rollback(); // Rollback en caso de error
                 } catch (SQLException ex) {
                     plugin.getLogger().log(Level.SEVERE, "Error al hacer rollback", ex);
                 }
@@ -102,7 +102,7 @@ public class TribesDAO {
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true);  // Restaurar auto-commit
+                    conn.setAutoCommit(true); // Restaurar auto-commit
                 } catch (SQLException e) {
                     plugin.getLogger().log(Level.SEVERE, "Error restableciendo auto-commit", e);
                 }
@@ -125,7 +125,7 @@ public class TribesDAO {
 
                 if (rs.next()) {
                     tribe = mapTribeFromResultSet(rs);
-                    tribe.setRanks(RanksDAO.getRanksByTribe(id, conn));  // Conexión persistente
+                    tribe.setRanks(RanksDAO.getRanksByTribe(id, conn)); // Conexión persistente
                     tribe.setMembers(TribeMembersDAO.getTribeMembersByTribe(id, conn));
                 }
             }
@@ -214,7 +214,7 @@ public class TribesDAO {
         Connection conn = null;
         try {
             conn = Database.getConnection();
-            conn.setAutoCommit(false);  // Iniciar transacción
+            conn.setAutoCommit(false); // Iniciar transacción
 
             // 1. Actualizar datos básicos
             String updateTribe = """
@@ -233,10 +233,10 @@ public class TribesDAO {
             }
 
             // 2. Sincronizar rangos y miembros
-            syncRanks(tribe, conn);  // Conexión compartida
+            syncRanks(tribe, conn); // Conexión compartida
             syncMembers(tribe, conn);
 
-            conn.commit();  // Confirmar cambios
+            conn.commit(); // Confirmar cambios
 
             // 3. Actualizar YAML
             if (VitalCore.fileManager.getConfigFile().getBoolean("tribe.allow_yaml")) {
@@ -336,9 +336,10 @@ public class TribesDAO {
 
     private static void updateYamlFile(Tribe tribe) {
         TribeFile oldFile = VitalCore.fileManager.getTribeFile(tribe.getId().toString());
-        if (oldFile.getFile().exists()) oldFile.getFile().delete();
+        if (oldFile.getFile().exists())
+            oldFile.getFile().delete();
 
-        TribeFile newFile = new TribeFile(plugin, tribe.getId().toString(), "tribes", tribe);
+        TribeFile newFile = new TribeFile(plugin, tribe.getId().toString(), tribe);
         VitalCore.fileManager.getTribesFiles().add(newFile);
     }
 }

@@ -76,7 +76,7 @@ public class SkinManager {
             throw new IllegalArgumentException("UUID o Skin no pueden ser null");
         }
         String fileName = uuid.toString() + ".yml";
-        SkinFile skinFile = new SkinFile(plugin, fileName, "skins", skin);
+        SkinFile skinFile = new SkinFile(plugin, fileName, skin);
         skinFile.updateSkinData();
     }
 }

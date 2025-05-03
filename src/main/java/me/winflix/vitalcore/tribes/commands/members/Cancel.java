@@ -36,12 +36,12 @@ public class Cancel extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "tribes.commands.cancel.description";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe cancel <tribe>";
     }
 
@@ -53,8 +53,8 @@ public class Cancel extends SubCommand {
     @Override
     public void perform(Player p, String[] args) {
         Map<String, String> placeholders = new HashMap<>();
-        FileConfiguration messageFile = VitalCore.fileManager.getMessagesFile().getConfig();
-        placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax());
+        FileConfiguration messageFile = VitalCore.fileManager.getMessagesFile(p).getConfig();
+        placeholders.put(Placeholders.COMMAND_SYNTAX, getSyntax(p));
 
         // Verificar la cantidad de argumentos
         if (args.length < 2) {

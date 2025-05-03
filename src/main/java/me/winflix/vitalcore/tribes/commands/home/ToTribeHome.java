@@ -31,12 +31,12 @@ public class ToTribeHome extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command teleport you to home of your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe home";
     }
 
@@ -53,7 +53,7 @@ public class ToTribeHome extends SubCommand {
         String tribeHome = TribesDAO.getTribeByMember(p.getUniqueId()).getTribeHome();
 
         // Obtener la configuración de mensajes
-        FileConfiguration messagesFile = VitalCore.fileManager.getMessagesFile().getConfig();
+        FileConfiguration messagesFile = VitalCore.fileManager.getMessagesFile(p).getConfig();
         String successMessage = messagesFile.getString("tribes.homes.to.success");
         String errorMessage = messagesFile.getString("tribes.homes.to.error");
 

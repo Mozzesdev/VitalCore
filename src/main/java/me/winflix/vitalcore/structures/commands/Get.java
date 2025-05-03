@@ -38,12 +38,12 @@ public class Get extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command save the home of your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/str get [structure] [amount]";
     }
 
@@ -64,7 +64,7 @@ public class Get extends SubCommand {
     @Override
     public void perform(Player p, String[] args) {
         if (args.length == 1) {
-            Utils.errorMessage(p, "Syntax error: use " + getSyntax());
+            Utils.errorMessage(p, "Syntax error: use " + getSyntax(p));
             return;
         }
 

@@ -162,7 +162,6 @@ public class UsersDAO {
         UserFile userFile = new UserFile(
                 plugin,
                 user.getId().toString(),
-                "users",
                 user);
 
         VitalCore.fileManager.getUsersFiles().removeIf(f -> f.getUser().getId().equals(user.getId()));

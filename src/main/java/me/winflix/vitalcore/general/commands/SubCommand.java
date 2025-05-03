@@ -13,13 +13,13 @@ public abstract class SubCommand {
     public abstract String getVariants();
 
     // ex. "This is a subcommand that let's a shark eat someone"
-    public abstract String getDescription();
+    public abstract String getDescription(Player p);
 
     // permission needed for execute the command
     public abstract String getPermission();
 
     // How to use command ex. /prank freeze <player>
-    public abstract String getSyntax();
+    public abstract String getSyntax(Player p);
 
     // name of the subcommandArgument ex. /prank <subcommand> <-- that
     public abstract List<String> getSubCommandArguments(Player player, String args[]);

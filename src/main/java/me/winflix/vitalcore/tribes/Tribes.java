@@ -64,4 +64,8 @@ public class Tribes extends Manager {
         tribeCommands.add(new Delete());
     }
 
+    @Override
+    public void onDisable() {
+    }
+
 }

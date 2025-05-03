@@ -34,12 +34,12 @@ public class Leave extends SubCommand {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(Player p) {
         return "This command invite a player or players to your tribe.";
     }
 
     @Override
-    public String getSyntax() {
+    public String getSyntax(Player p) {
         return "/tribe leave";
     }
 
@@ -76,7 +76,7 @@ public class Leave extends SubCommand {
         // Crear el menú de confirmación
         ConfirmMenu confirmMenu = new ConfirmMenu(
                 p,
-                VitalCore.fileManager.getMessagesFile().getConfig(),
+                VitalCore.fileManager.getMessagesFile(p).getConfig(),
                 confirmMessages,
                 menuName);
 

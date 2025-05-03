@@ -92,4 +92,8 @@ public class Residents extends Manager {
         }
     }
 
+    @Override
+    public void onDisable() {
+    }
+
 }

@@ -3,6 +3,7 @@ package me.winflix.vitalcore.core.managers;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.utils.Utils;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.regex.Matcher;
 
@@ -49,9 +51,14 @@ public class ChatManager {
         }
     }
 
-    private String formatAndModerateMessage(String message) {
+    private String formatAndModerateMessage(Player sender, String message) {
         String cleanMessage = censorMessage(message);
-        return Utils.useColors(cleanMessage);
+
+        if (sender.hasPermission("vitalcore.chat.color") || sender.isOp()) {
+            return Utils.useColors(cleanMessage);
+        } else {
+            return cleanMessage;
+        }
     }
 
     private String censorMessage(String message) {
@@ -64,7 +71,7 @@ public class ChatManager {
         return censored;
     }
 
-    private boolean containsAdvertisement(String message, Player sender) {
+    public boolean containsAdvertisement(String message, Player sender) {
         Pattern urlPattern = Pattern.compile("((https?://)?(www\\.)?([\\w-]+)\\.[\\w]{2,})", Pattern.CASE_INSENSITIVE);
         Matcher matcher = urlPattern.matcher(message);
 
@@ -85,15 +92,18 @@ public class ChatManager {
         return false;
     }
 
-    private void notifyStaff(Player offender) {
+    public void notifyStaff(Player offender) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.hasPermission("antiadvertising.notify") && !player.equals(offender)) {
-                Utils.infoMessage(player, "&cEl jugador &e" + offender.getName() + " &cintentó hacer publicidad.");
+                String msg = VitalCore.fileManager.getMessagesFile(player).getConfig()
+                        .getString("chat.advertising.staff-notify")
+                        .replace("${player:name}", offender.getName());
+                Utils.infoMessage(player, msg);
             }
         }
     }
 
-    private void executeAdvertisementCommand(Player offender) {
+    public void executeAdvertisementCommand(Player offender) {
         if (!advertisementCommand.isEmpty()) {
             String command = advertisementCommand.replace("{player}", offender.getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
@@ -102,13 +112,15 @@ public class ChatManager {
 
     public void sendPublicMessage(Player sender, String message) {
         if (containsAdvertisement(message, sender)) {
-            Utils.errorMessage(sender, "&cNo puedes hacer publicidad a otros servidores.");
+            String msg = VitalCore.fileManager.getMessagesFile(sender).getConfig()
+                    .getString("chat.advertising.blocked");
+            Utils.errorMessage(sender, msg);
             notifyStaff(sender);
             executeAdvertisementCommand(sender);
             return;
         }
 
-        String formattedMessage = formatAndModerateMessage(message);
+        String formattedMessage = formatAndModerateMessage(sender, message);
         notifyMentions(sender, formattedMessage);
         String finalMessage = Utils.useColors("&7" + sender.getName() + ": ") + formattedMessage;
         Bukkit.getServer().broadcastMessage(finalMessage);
@@ -116,24 +128,33 @@ public class ChatManager {
 
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
         if (containsAdvertisement(message, sender)) {
-            Utils.errorMessage(sender, "&cNo puedes enviar mensajes con publicidad.");
+            String msg = VitalCore.fileManager.getMessagesFile(sender).getConfig()
+                    .getString("chat.advertising.private-blocked");
+            Utils.errorMessage(sender, msg);
             notifyStaff(sender);
             executeAdvertisementCommand(sender);
             return;
         }
 
-        String formattedMessage = formatAndModerateMessage(message);
+        String formattedMessage = formatAndModerateMessage(sender, message);
         notifyMentions(sender, formattedMessage);
 
-        receiver.sendMessage(Utils.useColors("&a[Privado de " + sender.getName() + "]: ") + formattedMessage);
-        sender.sendMessage(Utils.useColors("&a[Privado a " + receiver.getName() + "]: ") + formattedMessage);
+        FileConfiguration config = VitalCore.fileManager.getMessagesFile(sender).getConfig();
+
+        String toReceiver = config.getString("chat.private.from")
+                .replace("{sender}", sender.getName());
+        String toSender = config.getString("chat.private.to")
+                .replace("{receiver}", receiver.getName());
+
+        receiver.sendMessage(Utils.useColors(toReceiver + formattedMessage));
+        sender.sendMessage(Utils.useColors(toSender + formattedMessage));
     }
 
     private void notifyMentions(Player sender, String message) {
         if (message.contains(mentionEveryone)) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!player.equals(sender))
-                    notifyPlayerMentioned(player);
+                    notifyPlayerMentioned(sender, player);
             }
             return;
         }
@@ -146,14 +167,16 @@ public class ChatManager {
             Pattern mentionPattern = Pattern.compile("(?i)" + pattern);
             Matcher matcher = mentionPattern.matcher(message);
             if (matcher.find()) {
-                notifyPlayerMentioned(player);
+                notifyPlayerMentioned(sender, player);
             }
         }
     }
 
-    private void notifyPlayerMentioned(Player player) {
+    private void notifyPlayerMentioned(Player sender, Player player) {
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.2f);
-        player.sendTitle(Utils.useColors("&e¡Te han mencionado!"), "", 10, 40, 10);
+        String title = VitalCore.fileManager.getMessagesFile(player).getConfig()
+                .getString("chat.mention.title").replace("{sender}", sender.getDisplayName());
+        player.sendTitle(Utils.useColors(title), "", 10, 40, 10);
     }
 
     public void setBannedWords(List<String> bannedWords) {

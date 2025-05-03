@@ -42,3 +42,23 @@ commands:
     usage: /<command>
     aliases:
       - teleportdeny
+  spawn:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - sp
+  setspawn:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - ssp
+  msg:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - tell
+  addons:
+    description: Main command of the VitalCore
+    usage: /<command>
+    aliases:
+      - adds

@@ -62,8 +62,13 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.5</version>
         </dependency>
-    </dependencies>
 
+        <dependency>
+            <groupId>com.sun.net.httpserver</groupId>
+            <artifactId>http</artifactId>
+            <version>20070405</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>

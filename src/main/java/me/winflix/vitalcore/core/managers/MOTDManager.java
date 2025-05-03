@@ -12,13 +12,12 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.general.utils.Utils;
+import me.winflix.vitalcore.core.utils.CenteredText;
 
 public class MOTDManager {
 
     private List<String> motdList;
     private Map<String, String> iconMappings; // Mapea patrones de MOTD a nombres de iconos.
-    private boolean downsampleColors;
     private int fakePlayerCount;
     private int additionalMaxPlayers;
     private final File iconsFolder;
@@ -41,7 +40,6 @@ public class MOTDManager {
             this.motdList = Collections.singletonList("&aBienvenido al servidor!");
         }
 
-        this.downsampleColors = config.getBoolean("downsample-colors", false);
         this.fakePlayerCount = config.getInt("fake-player-count", -1);
         this.additionalMaxPlayers = config.getInt("additional-max-players", 0);
 
@@ -61,11 +59,15 @@ public class MOTDManager {
      */
     public String getProcessedMotd() {
         String rawMotd = getRandomMotd();
-        String processedMotd = applyColorsAndGradients(rawMotd);
-        if (downsampleColors) {
-            processedMotd = downsampleRGB(processedMotd);
+        String[] lines = rawMotd.split("\n");
+    
+        StringBuilder centeredMotd = new StringBuilder();
+        for (int i = 0; i < lines.length; i++) {
+            centeredMotd.append(CenteredText.getCenteredText(lines[i]));
+            if (i < lines.length - 1) centeredMotd.append("\n");
         }
-        return processedMotd;
+    
+        return centeredMotd.toString();
     }
 
     /**
@@ -74,27 +76,6 @@ public class MOTDManager {
     public String getRandomMotd() {
         int index = random.nextInt(motdList.size());
         return motdList.get(index);
-    }
-
-    /**
-     * Aplica la traducción de códigos de colores (& -> §) y procesa códigos
-     * hexadecimales.
-     * Esta implementación es básica y asume que los códigos hex ya son compatibles.
-     * Para gradientes se requiere una implementación adicional.
-     */
-    private String applyColorsAndGradients(String motd) {
-        return Utils.useColors(motd);
-    }
-
-    /**
-     * Downsample RGB: método simplificado que elimina los códigos hexadecimales
-     * para clientes antiguos.
-     * Una implementación real mapearía los colores hex a los más cercanos de la
-     * paleta legacy.
-     */
-    private String downsampleRGB(String motd) {
-        // Remueve códigos hex (por ejemplo, "#FFAA00")
-        return motd.replaceAll("#[a-fA-F0-9]{6}", "");
     }
 
     /**

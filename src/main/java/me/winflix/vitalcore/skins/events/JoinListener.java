@@ -25,7 +25,9 @@ public class JoinListener implements Listener {
 
         if (skin == null) {
             skin = SkinGrabber.changeSkin(player, player.getDisplayName());
-            VitalCore.Log.info(skin.toString());
+            if (skin == null) {
+                return;
+            }
             skinManager.updateSkin(player, skin);
         } else {
             SkinGrabber.applySkin(player, skin);
