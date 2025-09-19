@@ -1,0 +1,14 @@
+itemVelocityFactor: 0.3
+visualSpawnOffsetY: 1.2
+maxFlyTicks: 40
+flyTickInterval: 2
+openToFlyDelay: 40
+idleDelay: 20
+
+chests:
+  wooden_chest:
+    modelId: "wooden_chest"
+    animations:
+      idle: "idle"
+      open: "opening"
+      close: "closing"

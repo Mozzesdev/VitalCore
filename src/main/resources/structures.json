@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Wooden Foundation",
+        "type": "FOUNDATION",
+        "health": 50,
+        "item": {
+            "type": "OAK_PLANKS",
+            "displayName": "&7Wooden Foundation",
+            "lore": [
+                "&7A strong and durable foundation made of oak."
+            ]
+        },
+        "recipe": {
+            "ingredients": {
+                "A": "OAK_SLAB",
+                "B": "OAK_PLANKS"
+            },
+            "shape": ["AAA", "ABA", "AAA"]
+        },
+        "matriz": [
+            [
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"],
+                ["OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS", "OAK_PLANKS"]
+            ],
+            [
+                ["OAK_SLAB", "OAK_SLAB", "OAK_SLAB", "OAK_SLAB","OAK_SLAB"],
+                ["OAK_SLAB", null, null, null,"OAK_SLAB"],
+                ["OAK_SLAB", null, null, null,"OAK_SLAB"],
+                ["OAK_SLAB", null, null, null,"OAK_SLAB"],
+                ["OAK_SLAB", "OAK_SLAB", "OAK_SLAB","OAK_SLAB", "OAK_SLAB"]
+            ]
+        ],
+        "id": "wooden_foundation"
+    }
+]

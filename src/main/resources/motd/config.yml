@@ -1,0 +1,7 @@
+motds:
+  - "&aBienvenido al servidor!\n&b¡Disfruta de tu estancia!"
+downsample-colors: false
+fake-player-count: -1
+additional-max-players: 0
+icon-mappings:
+  "Bienvenido": "icon.png"

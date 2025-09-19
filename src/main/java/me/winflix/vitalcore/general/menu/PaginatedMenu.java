@@ -1,85 +1,116 @@
 package me.winflix.vitalcore.general.menu;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import dev.dbassett.skullcreator.SkullCreator;
-import me.winflix.vitalcore.general.models.PlayerMenuUtility;
-import me.winflix.vitalcore.general.utils.Utils;
+import me.winflix.vitalcore.general.utils.SkullUtils;
+import net.md_5.bungee.api.ChatColor;
 
 public abstract class PaginatedMenu extends Menu {
-
-    public PaginatedMenu(PlayerMenuUtility playerMenuUtility) {
-        super(playerMenuUtility);
-    }
-
     protected int page = 0;
+    protected final int ITEMS_PER_ROW = 7; // Items por fila
+    protected final int CONTENT_START_ROW = 1; // Fila donde inicia el contenido
+    private final int MAX_ITEMS_PER_PAGE = 28; // 4 filas de 7 items
+    private int NAVIGATION_ROW;
 
-    protected int maxItemsPerPage = 29;
+    public PaginatedMenu(Player owner) {
+        super(owner);
+    }
 
-    protected int index = 0;
+    @Override
+    public int getSlots() {
+        int totalItems = Math.min(getAllItems().size(), MAX_ITEMS_PER_PAGE);
+        int totalContentRows = (int) Math.ceil((double) totalItems / ITEMS_PER_ROW);
+        int totalRows = totalContentRows + 2;
+        NAVIGATION_ROW = totalRows - 1;
+        return totalRows * 9;
+    }
 
-    public void addMenuBorder() {
-        int totalSlots = getSlots();
+    @Override
+    public void handleMenu(InventoryClickEvent event) {
+        ItemStack clickedItem = event.getCurrentItem();
+        if (clickedItem == null || !clickedItem.hasItemMeta())
+            return;
 
-        int[] whiteSlots = new int[] { 10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33,
-                34, 37, 38, 39, 40, 41, 42, 43 };
-        int[] controlsSlots = new int[] { 21, 22, 23, 30, 31, 32, 39, 40, 41, 48, 49, 50 };
+        String displayName = ChatColor.stripColor(clickedItem.getItemMeta().getDisplayName());
+        Player player = (Player) event.getWhoClicked();
 
-        List<Integer> whitelist = new ArrayList<>();
-        List<Integer> controlList = new ArrayList<>();
-
-        for (int i : controlsSlots) {
-            if (i < totalSlots && i > (totalSlots - 7)) {
-                controlList.add(i);
+        switch (displayName) {
+            case "Previous page" -> {
+                if (page > 0) {
+                    page--;
+                    open();
+                }
             }
+            case "Next page" -> {
+                if (hasNextPage()) {
+                    page++;
+                    open();
+                }
+            }
+            case "Close menu" -> player.closeInventory();
         }
 
-        for (int i : whiteSlots) {
-            if (i < (totalSlots - 8)) {
-                whitelist.add(i);
+        event.setCancelled(true);
+    }
+
+    private boolean hasNextPage() {
+        return (page + 1) * MAX_ITEMS_PER_PAGE < getAllItems().size();
+    }
+
+    @Override
+    public void setMenuItems() {
+        addBorders(); // Primero los bordes
+        addContentItems(); // Luego el contenido
+        addNavigationRow(); // Finalmente la navegación
+    }
+
+    private void addBorders() {
+        for (int i = 0; i < inventory.getSize(); i++) {
+            if (inventory.getItem(i) == null) {
+                if (i < CONTENT_START_ROW * 9 || i % 9 == 0 || i % 9 == 8 || i >= NAVIGATION_ROW * 9) {
+                    inventory.setItem(i, FILLER_GLASS);
+                }
             }
         }
+    }
 
-        ItemStack previousPage = createSkullItem("&ePrevious page",
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzYyNTkwMmIzODllZDZjMTQ3NTc0ZTQyMmRhOGY4ZjM2MWM4ZWI1N2U3NjMxNjc2YTcyNzc3ZTdiMWQifX19");
-        ItemStack nextPage = createSkullItem("&eNext page",
-                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDRiZThhZWVjMTE4NDk2OTdhZGM2ZmQxZjE4OWIxNjY0MmRmZjE5ZjI5NTVjMDVkZWFiYTY4YzlkZmYxYmUifX19");
-        ItemStack close = createSkullItem("&cClose menu",
+    private void addContentItems() {
+        List<ItemStack> items = getAllItems();
+        int startIndex = page * ITEMS_PER_ROW * (NAVIGATION_ROW - CONTENT_START_ROW);
+        int endIndex = Math.min(startIndex + ITEMS_PER_ROW * (NAVIGATION_ROW - CONTENT_START_ROW), items.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            int row = CONTENT_START_ROW + (i - startIndex) / ITEMS_PER_ROW;
+            int column = (i - startIndex) % ITEMS_PER_ROW;
+            int slot = row * 9 + column + 1; // +1 para evitar bordes laterales
+
+            if (slot < inventory.getSize()) {
+                inventory.setItem(slot, items.get(i));
+            }
+        }
+    }
+
+    private void addNavigationRow() {
+        int navRowStart = NAVIGATION_ROW * 9;
+        ItemStack previous = createButton("&ePrevious page",
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==");
+        ItemStack close = createButton("&cClose menu",
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkMWFiYTczZjYzOWY0YmM0MmJkNDgxOTZjNzE1MTk3YmUyNzEyYzNiOTYyYzk3ZWJmOWU5ZWQ4ZWZhMDI1In19fQ==");
+        ItemStack next = createButton("&eNext page",
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTliZjMyOTJlMTI2YTEwNWI1NGViYTcxM2FhMWIxNTJkNTQxYTFkODkzODgyOWM1NjM2NGQxNzhlZDIyYmYifX19");
 
-        ItemMeta fillerMeta = super.FILLER_GLASS.getItemMeta();
-        fillerMeta.setDisplayName(Utils.useColors("&5mc.wiped.com"));
-        super.FILLER_GLASS.setItemMeta(fillerMeta);
-
-        int stated = 0;
-
-        for (int controlSlot : controlList) {
-            if (stated > 2) {
-                break;
-            }
-            if (inventory.getItem(controlSlot) == null && controlSlot <= totalSlots) {
-                inventory.setItem(controlSlot, stated == 0 ? previousPage : (stated == 1 ? close : nextPage));
-                stated++;
-            }
-        }
-
-        for (int i = 0; i < totalSlots; i++) {
-            if (!whitelist.contains(i) && inventory.getItem(i) == null) {
-                inventory.setItem(i, super.FILLER_GLASS);
-            }
-        }
+        inventory.setItem(navRowStart + 3, previous);
+        inventory.setItem(navRowStart + 4, close);
+        inventory.setItem(navRowStart + 5, next);
     }
 
-    private ItemStack createSkullItem(String displayName, String base64Texture) {
-        ItemStack skullItem = SkullCreator.itemFromBase64(base64Texture);
-        ItemMeta skullMeta = skullItem.getItemMeta();
-        skullMeta.setDisplayName(Utils.useColors(displayName));
-        skullItem.setItemMeta(skullMeta);
-        return skullItem;
+    private ItemStack createButton(String name, String texture) {
+        return SkullUtils.createSkull(texture, name, List.of());
     }
 
+    protected abstract List<ItemStack> getAllItems();
 }

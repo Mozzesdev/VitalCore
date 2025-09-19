@@ -6,13 +6,13 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import dev.dbassett.skullcreator.SkullCreator;
 import me.winflix.vitalcore.general.menu.Menu;
-import me.winflix.vitalcore.general.models.PlayerMenuUtility;
+import me.winflix.vitalcore.general.utils.SkullUtils;
 import me.winflix.vitalcore.general.utils.Utils;
 
 public class ConfirmMenu extends Menu implements ConfirmMenuMessages {
@@ -20,9 +20,9 @@ public class ConfirmMenu extends Menu implements ConfirmMenuMessages {
     ConfirmMessages confirmMessages;
     String menuName;
 
-    public ConfirmMenu(PlayerMenuUtility playerMenuUtility, FileConfiguration messages,
+    public ConfirmMenu(Player owner, FileConfiguration messages,
             ConfirmMessages confirmMessages, String menuName) {
-        super(playerMenuUtility);
+        super(owner);
         this.menuName = menuName;
         this.confirmMessages = confirmMessages;
     }
@@ -97,11 +97,7 @@ public class ConfirmMenu extends Menu implements ConfirmMenuMessages {
     }
 
     private ItemStack createSkullItem(String base64Texture, String displayName, List<String> lore) {
-        ItemStack item = SkullCreator.itemFromBase64(base64Texture);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Utils.useColors(displayName));
-        meta.setLore(lore.stream().map(Utils::useColors).collect(Collectors.toList()));
-        item.setItemMeta(meta);
+        ItemStack item = SkullUtils.createSkull(base64Texture, displayName, lore);
         return item;
     }
 
