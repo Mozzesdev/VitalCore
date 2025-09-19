@@ -21,7 +21,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -115,6 +115,12 @@
       <artifactId>spigot</artifactId>
       <version>1.21.4-R0.1-SNAPSHOT</version>
       <classifier>remapped-mojang</classifier>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>me.winflix.rsmanager</groupId>
+      <artifactId>RSManager</artifactId>
+      <version>1.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

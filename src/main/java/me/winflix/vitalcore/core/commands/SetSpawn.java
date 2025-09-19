@@ -28,12 +28,12 @@ public class SetSpawn extends BaseCommand {
     
     @Override
     public String getVariants() {
-        return "";
+        return "ssp";
     }
     
     @Override
     public String getDescription() {
-        return "";
+        return "Establece el punto de spawn del mundo actual";
     }
     
     @Override

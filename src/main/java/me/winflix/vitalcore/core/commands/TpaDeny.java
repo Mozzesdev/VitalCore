@@ -2,7 +2,6 @@ package me.winflix.vitalcore.core.commands;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.core.managers.TeleportManager;
@@ -17,12 +16,12 @@ public class TpaDeny extends BaseCommand {
 
     @Override
     public String getVariants() {
-        return null;
+        return "tpano|tpno|tpn";
     }
 
     @Override
     public String getDescription() {
-        return "Accept a teleport request from another player";
+        return "Rechaza una solicitud de teletransporte de otro jugador";
     }
 
     @Override
@@ -32,19 +31,23 @@ public class TpaDeny extends BaseCommand {
 
     @Override
     public String getSyntax() {
-        return "/tpadeny <player>";
+        return "/tpadeny [jugador]";
     }
 
     @Override
     public List<String> getArguments(Player player, String[] args) {
-        return Bukkit.getOnlinePlayers().stream()
-                .filter(p -> !p.getName().equalsIgnoreCase(player.getName()))
-                .map(Player::getName)
-                .toList();
+        // Solo mostrar jugadores que tienen solicitudes pendientes hacia este jugador
+        return TeleportManager.getPendingRequestSenders(player);
     }
 
     @Override
     public void perform(Player player, String[] args) {
+        // Si no hay argumentos, mostrar solicitudes pendientes
+        if (args.length == 0) {
+            TeleportManager.showPendingRequests(player);
+            return;
+        }
+        
         TeleportManager.denyRequest(player, args[0]);
     }
 }

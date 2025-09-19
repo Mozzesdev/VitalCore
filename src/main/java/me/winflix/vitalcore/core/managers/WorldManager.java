@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
+import me.winflix.vitalcore.core.managers.BackManager;
 import me.winflix.vitalcore.general.utils.Utils;
 
 import java.util.HashMap;
@@ -68,12 +69,16 @@ public class WorldManager {
         }
         
         if(instant) {
+            // Registrar ubicación previa antes del teletransporte
+            BackManager.setPreviousLocation(player);
             player.teleport(spawn);
         } else {
             // Teleportación con delay y efectos
             Utils.infoMessage(player, "Teletransportando al spawn en 3 segundos...");
             Bukkit.getScheduler().runTaskLater(VitalCore.getPlugin(), () -> {
                 if(player.isOnline()) {
+                    // Registrar ubicación previa antes del teletransporte
+                    BackManager.setPreviousLocation(player);
                     player.teleport(spawn);
                     player.sendTitle("§b§lSPAWN", "", 10, 40, 10);
                 }

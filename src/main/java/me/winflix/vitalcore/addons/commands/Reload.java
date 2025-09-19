@@ -3,7 +3,6 @@ package me.winflix.vitalcore.addons.commands;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.VitalCore;
@@ -45,11 +44,7 @@ public class Reload extends SubCommand {
     public void perform(Player player, String[] args) {
         player.sendMessage("&7[&bAddons&7] &fRecargando modelos y resource pack...");
         try {
-            // Recarga los modelos
             VitalCore.addons.getModelEngineManager().reload();
-            for (Player other : Bukkit.getServer().getOnlinePlayers()) {
-                VitalCore.addons.getResourcePackManager().sendResourcePackToPlayer(other);
-            }
 
             player.sendMessage("§7[§a✔§7] §aAddons recargado correctamente.");
         } catch (Exception e) {

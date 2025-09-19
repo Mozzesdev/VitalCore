@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import me.winflix.vitalcore.general.commands.BaseCommand;
 import me.winflix.vitalcore.tribes.menu.TribeMenu;
 
-public class BaseTribeCommand extends BaseCommand{
+public class BaseTribeCommand extends BaseCommand {
     @Override
     public String getName() {
         return "tribe";

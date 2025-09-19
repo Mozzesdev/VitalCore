@@ -1,414 +1,439 @@
 package me.winflix.vitalcore.addons.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Display.Billboard;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Transformation;
 import org.joml.Matrix4d;
+import org.joml.Matrix4f;
 import org.joml.Quaterniond;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.addons.interfaces.DefaultModelInstance;
-import me.winflix.vitalcore.addons.interfaces.JavaItemModel;
-import me.winflix.vitalcore.addons.interfaces.ModelHandler;
-import me.winflix.vitalcore.addons.interfaces.ModelInstance;
-import me.winflix.vitalcore.addons.interfaces.ProcessedBbModel;
-import me.winflix.vitalcore.addons.interfaces.ProcessedBone;
-import me.winflix.vitalcore.addons.managers.ResourcePackManager; // Para el namespace
+import me.winflix.vitalcore.addons.Addons;
+import me.winflix.vitalcore.addons.model.data.JavaItemModel;
+import me.winflix.vitalcore.addons.model.data.ModelContext;
+import me.winflix.vitalcore.addons.model.data.ModelHandler;
+import me.winflix.vitalcore.addons.model.data.ModelInstance;
+import me.winflix.vitalcore.addons.model.data.ProcessedBbModel;
+import me.winflix.vitalcore.addons.model.data.ProcessedBone;
+import me.winflix.vitalcore.addons.model.data.animation.AnimationController;
 import me.winflix.vitalcore.addons.utils.MathUtils;
 
+/**
+ * Handles spawning and managing model instances by attaching visual parts
+ * (ItemDisplay entities) as passengers to an invisible base entity.
+ */
 public class EntityModelHandler implements ModelHandler {
 
     private final String METADATA_KEY = "addons_custom_model";
-    // Activar para logs muy detallados de transformación
-    private static final boolean ENABLE_DEBUG_LOGS = true; // Mantener desactivado por defecto
+    private final String BASE_METADATA_KEY = METADATA_KEY + "_base";
+    private static final boolean ENABLE_DEBUG_LOGS = false;
+    private static final Matrix4f Y_FLIP_MATRIX = new Matrix4f().rotateY((float) Math.PI);
+    private static final float DELTA_TIME = 1.0f / 20.0f;
+    private static final String METADATA_VALUE_HANDLER_CREATED = "_handler_created";
 
-    /**
-     * Spawnea todas las entidades ItemDisplay necesarias para representar un modelo
-     * procesado
-     * en una ubicación específica.
-     *
-     * @param model    El modelo procesado (ProcessedBbModel) a instanciar.
-     * @param location La ubicación base donde aparecerá el modelo.
-     * @param owner    El jugador dueño (puede ser null).
-     * @return La ModelInstance creada que contiene las entidades, o null si falla.
-     */
+    @SuppressWarnings("unused")
     @Override
-    public ModelInstance spawn(ProcessedBbModel model, Location location, Player owner) {
-        if (model == null || location == null || location.getWorld() == null) {
-            VitalCore.Log.warning("[EntityModelHandler] Intento de spawn con modelo o ubicación nulos.");
-            return null;
-        }
-        // Crear la instancia que contendrá las entidades
-        DefaultModelInstance instance = new DefaultModelInstance(model, location, owner, this);
+    public ModelInstance createInstance(ProcessedBbModel model, ModelContext context) {
+        Location location = context.getLocation();
+        location.setPitch(0);
+        Player owner = context.getOwner().orElse(null);
+        Entity baseEntity = context.getTargetEntity().orElse(null);
 
-        // Matriz de transformación inicial en el mundo (solo traslación a la ubicación
-        // base)
-        // Usamos Matrix4d para los cálculos de jerarquía por precisión
-        Matrix4d initialWorldTransform = new Matrix4d().translation(location.getX(), location.getY(), location.getZ());
+        if (baseEntity == null) {
+            if (ENABLE_DEBUG_LOGS) {
+                VitalCore.Log.info("[EntityModelHandler DEBUG] No targetEntity in context for model '" + model.getName()
+                        + "'. Spawning default base entity.");
+            }
+            try {
+                final Location spawnLocation = location.clone();
+                // Determine base entity type from context or default to Pig
+                EntityType baseEntityType = context.getCustomData("base_entity_type", EntityType.class)
+                        .orElse(EntityType.PIG);
 
-        if (ENABLE_DEBUG_LOGS) {
-            VitalCore.Log.info("[DEBUG] Spawning model '" + model.getName() + "' at " + location.toVector());
-        }
+                baseEntity = spawnLocation.getWorld().spawn(spawnLocation, baseEntityType.getEntityClass(), entity -> {
+                    if (entity instanceof LivingEntity) {
+                        ((LivingEntity) entity).setSilent(true);
+                    }
+                    if (entity instanceof Ageable) {
+                        ((Ageable) entity).setAdult();
+                    }
+                    entity.setPersistent(true);
+                    entity.setMetadata(METADATA_KEY, new FixedMetadataValue(VitalCore.getPlugin(),
+                            model.getName() + METADATA_VALUE_HANDLER_CREATED));
+                });
 
-        // Empezar el proceso recursivo desde los huesos raíz del modelo procesado
-        // Es crucial obtener las raíces correctamente desde ProcessedBbModel
-        Map<String, ProcessedBone> allProcessedBones = model.getBones(); // Obtener TODOS los huesos procesados
-        if (allProcessedBones == null || allProcessedBones.isEmpty()) {
-            VitalCore.Log.warning("[EntityModelHandler] El modelo procesado '" + model.getName()
-                    + "' no contiene huesos procesados.");
-            // Podríamos devolver la instancia vacía o null dependiendo del caso de uso
-            return instance; // Devolver instancia vacía por ahora
-        }
-
-        for (ProcessedBone proBone : allProcessedBones.values()) {
-            // Solo procesar raíces (aquellos cuyo padre no está en el mapa o es null)
-            if (proBone.getParent() == null) {
-                if (ENABLE_DEBUG_LOGS) {
-                    VitalCore.Log.info("[DEBUG] Spawning root bone: " + proBone.getName());
+                if (baseEntity == null || !baseEntity.isValid()) {
+                    VitalCore.Log.severe("[EntityModelHandler] Failed to spawn BASE entity (" + baseEntityType.name()
+                            + ") for model: " + model.getName());
+                    return null;
                 }
-                spawnBoneRecursive(instance, proBone, initialWorldTransform);
+                if (ENABLE_DEBUG_LOGS) {
+                    VitalCore.Log.info("[EntityModelHandler DEBUG] Spawned new base entity (ID: "
+                            + baseEntity.getEntityId()
+                            + ", Type: " + baseEntityType.name() + ") for model '" + model.getName() + "'");
+                }
+            } catch (Exception e) {
+                VitalCore.Log.log(Level.SEVERE,
+                        "[EntityModelHandler] Exception spawning NEW base entity for model: " + model.getName(), e);
+                return null;
+            }
+        } else {
+            VitalCore.Log.info("[EntityModelHandler] Using provided targetEntity (ID: " + baseEntity.getEntityId()
+                    + ") for model '" + model.getName() + "'.");
+            if (!baseEntity.hasMetadata(BASE_METADATA_KEY)) {
+                baseEntity.setMetadata(BASE_METADATA_KEY,
+                        new FixedMetadataValue(VitalCore.getPlugin(), model.getName() + "_linked"));
             }
         }
 
-        if (instance.getBoneEntities().isEmpty() && !allProcessedBones.isEmpty() && ENABLE_DEBUG_LOGS) {
-            VitalCore.Log.warning("[DEBUG] ModelInstance " + instance.getInstanceUuid()
-                    + " no tiene entidades asociadas después del spawn recursivo (¿Ningún hueso tenía JavaItemModels?).");
+        ModelInstance instance = new ModelInstance(model, context, this);
+        instance.setBaseEntity(baseEntity); // Ensure ModelInstance has the correct base entity reference
+
+        // Initial transformation for root bones relative to the base entity's origin
+        // (use Matrix4d)
+        Matrix4d initialRootParentTransform = new Matrix4d().translate(0.0, -baseEntity.getHeight(), 0.0);
+
+        Map<String, ProcessedBone> allProcessedBones = model.getBones();
+        if (allProcessedBones == null || allProcessedBones.isEmpty()) {
+            VitalCore.Log.warning("[EntityModelHandler] Processed model '" + model.getName()
+                    + "' has no bones (linked to entity " + baseEntity.getEntityId() + ").");
+            return instance;
         }
-        VitalCore.Log.info("[EntityModelHandler] Modelo '" + model.getName() + "' spawneado con "
-                + instance.getBoneEntities().size() + " entidades de hueso.");
+
+        for (ProcessedBone proBone : allProcessedBones.values()) {
+            if (proBone.getParent() == null) {
+                spawnBoneRecursiveAttached(instance, proBone, initialRootParentTransform, baseEntity);
+            }
+        }
+
+        if (instance.getBoneEntities().isEmpty() && !allProcessedBones.isEmpty()) {
+            if (ENABLE_DEBUG_LOGS)
+                VitalCore.Log.warning("[EntityModelHandler DEBUG] ModelInstance " + instance.getInstanceUuid()
+                        + " has no associated bone entities after recursive spawn (attached to "
+                        + baseEntity.getEntityId() + ")");
+        }
+        if (ENABLE_DEBUG_LOGS)
+            VitalCore.Log.info("[EntityModelHandler DEBUG] Model '" + model.getName()
+                    + "' instance created, linked to entity "
+                    + baseEntity.getEntityId() + " with " + instance.getBoneEntities().size() + " bone entities.");
+
         return instance;
     }
 
     /**
-     * Método recursivo para spawnear la entidad ItemDisplay de un hueso y sus
-     * hijos.
+     * Spawnea recursivamente las partes visuales (ItemDisplay) de un hueso y sus
+     * hijos
      *
-     * @param instance             La instancia del modelo a la que pertenece este
-     *                             hueso.
-     * @param bone                 El ProcessedBone actual a spawnear.
-     * @param parentWorldTransform La matriz de transformación acumulada del padre.
+     * @param instance                La instancia del modelo.
+     * @param bone                    El hueso a procesar.
+     * @param parentRelativeTransform La transformación relativa acumulada del padre
+     *                                respecto a la entidad base.
+     * @param baseEntity              La entidad base a la que se adjuntarán los
+     *                                displays.
      */
-    private void spawnBoneRecursive(DefaultModelInstance instance, ProcessedBone bone, Matrix4d parentWorldTransform) {
-        if (bone == null)
+    private void spawnBoneRecursiveAttached(ModelInstance instance, ProcessedBone bone,
+            Matrix4d parentRelativeTransform, Entity baseEntity) {
+        if (bone == null || baseEntity == null || !baseEntity.isValid())
             return;
 
-        // --- 1. Calcular la Transformación Local del Hueso ---
-        // Pivote relativo al padre (ya está en ProcessedBone.initialPivot)
-        // Rotación inicial del hueso (ya está en ProcessedBone.initialRotation)
-
-        // Convertir pivote y rotación de Blockbench a coordenadas/rotación de
-        // Minecraft/JOML
-        // Pivote: Negar X/Z y escalar / 16
         Vector3d scaledPivot = new Vector3d(
                 bone.getInitialPivot().x / 16.0,
                 bone.getInitialPivot().y / 16.0,
                 bone.getInitialPivot().z / 16.0);
-        // Rotación: Convertir Euler ZYX (grados) a Cuaternión
         Quaterniond localRotationQuat = MathUtils.fromEulerZYX(new Vector3d(bone.getInitialRotation()));
 
-        // Crear la matriz de transformación local: Traslación(pivote) * Rotación
-        // La escala inicial del hueso suele ser 1, se aplica después globalmente si es
-        // necesario
-        Matrix4d localTransform = new Matrix4d()
-                .translate(scaledPivot) // Mover al pivote
-                .rotate(localRotationQuat); // Aplicar rotación inicial
+        Matrix4d localInitialTransform = new Matrix4d()
+                .translate(scaledPivot)
+                .rotate(localRotationQuat)
+                .rotateY(Math.PI);
 
-        Matrix4d currentWorldTransform = new Matrix4d(parentWorldTransform).mul(localTransform);
+        Matrix4d currentRelativeTransform = new Matrix4d(parentRelativeTransform).mul(localInitialTransform);
 
-        if (ENABLE_DEBUG_LOGS) {
-            VitalCore.Log.info("-----------------------------------------");
-            VitalCore.Log.info("[DEBUG] Bone: " + bone.getName() + " (UUID: " + bone.getUuid() + ")");
-            VitalCore.Log.info("[DEBUG]   Initial Pivot (Raw BB): " + vectorToString(bone.getInitialPivot()));
-            VitalCore.Log.info("[DEBUG]   Scaled Pivot (MC Coords): " + vectorToString(scaledPivot));
-            VitalCore.Log
-                    .info("[DEBUG]   Initial Rotation (Euler ZYX Deg): " + vectorToString(bone.getInitialRotation()));
-            VitalCore.Log.info("[DEBUG]   Local Rotation (Quat): " + quatToString(localRotationQuat));
-            // VitalCore.Log.info("[DEBUG] Parent World Transform:\n" +
-            // matrixToString(parentWorldTransform));
-            // VitalCore.Log.info("[DEBUG] Local Transform:\n" +
-            // matrixToString(localTransform));
-            // VitalCore.Log.info("[DEBUG] Current World Transform:\n" +
-            // matrixToString(currentWorldTransform));
-        }
-
-        // --- 3. Spawnear ItemDisplay si el hueso tiene modelos visuales ---
+        // 3. Spawnear ItemDisplays para las partes visuales de ESTE hueso
         if (bone.getItemModels() != null && !bone.getItemModels().isEmpty()) {
-            int modelIndex = 0; // Para manejar huesos divididos por RotationSolver
+            int modelPartIndex = 0;
             for (JavaItemModel javaModel : bone.getItemModels()) {
-                String modelPartName = javaModel.getName(); // Nombre asignado por ModelProcessor (ej. "mundo" o
-                                                            // "mundo_2")
-                String bonePartKey = bone.getUuid() + ":" + modelPartName; // Clave única para el mapa
+                String modelPartName = javaModel.getName();
+                String bonePartKey = bone.getUuid() + ":" + modelPartName;
 
-                // Construir el NamespacedKey para el modelo JSON
-                String modelPath = instance.getModel().getName() + "/" + modelPartName;
-                // Ajustar si hay subdirectorios para partes (ej. "mundo/2")
-                if (modelPartName.contains("_")) { // Asumiendo sufijo _<num>
-                    String baseName = modelPartName.substring(0, modelPartName.lastIndexOf('_'));
-                    String indexStr = modelPartName.substring(modelPartName.lastIndexOf('_') + 1);
-                    modelPath = instance.getModel().getName() + "/" + baseName + "/" + indexStr;
-                } else if (bone.getItemModels().size() > 1 && modelIndex > 0) {
-                    // Si no hay sufijo pero hay múltiples, usar índice (menos ideal)
-                    modelPath = instance.getModel().getName() + "/" + modelPartName + "/" + (modelIndex + 1);
-                }
-
-                NamespacedKey modelKey = null;
-                try {
-                    // Usar el namespace correcto y la ruta generada
-                    modelKey = new NamespacedKey(ResourcePackManager.VITALCORE_NAMESPACE, modelPath);
-                    if (ENABLE_DEBUG_LOGS)
-                        VitalCore.Log.info("[DEBUG]   Attempting to use ItemModel Key: " + modelKey);
-                } catch (Exception e) { // Captura excepciones de NamespacedKey (caracteres inválidos, etc.)
-                    VitalCore.Log.warning("[EntityModelHandler] Error creando NamespacedKey para: "
-                            + ResourcePackManager.VITALCORE_NAMESPACE + ":" + modelPath + " - " + e.getMessage());
-                    continue; // Saltar este JavaItemModel si la clave es inválida
-                }
-
-                // Crear el ItemStack (usando STICK o el material base configurado)
-                ItemStack displayItem = new ItemStack(ResourcePackManager.BASE_ITEM_MATERIAL);
+                ItemStack displayItem = new ItemStack(Material.PAPER);
                 ItemMeta meta = displayItem.getItemMeta();
-
                 if (meta != null) {
+                    String itemModelPath = instance.getModel().getName() + "/" + bone.getName();
+                    if (bone.getItemModels().size() > 1) {
+                        itemModelPath += "/" + (modelPartIndex + 1);
+                    }
+
+                    NamespacedKey modelKey = null;
                     try {
-                        // --- Aplicar el modelo usando setItemModel (1.21+) ---
+                        // Usar el namespace definido en ResourcePackManager
+                        modelKey = new NamespacedKey(Addons.ADDONS_NAMESPACE, itemModelPath);
+                    } catch (Exception e) { // Captura errores de formato en NamespacedKey
+                        VitalCore.Log.warning("[EntityModelHandler] Error creando NamespacedKey para '"
+                                + Addons.ADDONS_NAMESPACE + ":" + itemModelPath + "': "
+                                + e.getMessage());
+                        continue;
+                    }
+
+                    try {
                         meta.setItemModel(modelKey);
                         displayItem.setItemMeta(meta);
                         if (ENABLE_DEBUG_LOGS)
-                            VitalCore.Log.info("[DEBUG]   Applied ItemModel Key: " + modelKey);
-
-                    } catch (Exception e) { // Capturar errores específicos si es posible
-                        VitalCore.Log.log(Level.SEVERE, "[EntityModelHandler] Error aplicando item_model '" + modelKey
-                                + "' a ItemMeta para hueso " + bone.getName(), e);
-                        continue; // Saltar si falla la aplicación del modelo
+                            VitalCore.Log
+                                    .info("[DEBUG ItemModel] Aplicado ItemModel '" + modelKey + "' a " + bonePartKey);
+                    } catch (Exception e) {
+                        VitalCore.Log.log(Level.SEVERE,
+                                "[EntityModelHandler] Error al aplicar ItemModel '" + modelKey + "' a " + bonePartKey,
+                                e);
+                        continue;
                     }
+
                 } else {
                     VitalCore.Log.warning("[EntityModelHandler] No se pudo obtener ItemMeta para "
-                            + displayItem.getType() + " (hueso: " + bone.getName() + ")");
-                    continue; // Saltar si no hay meta
+                            + displayItem.getType() + " (bone: " + bone.getName() + ")");
+                    continue;
                 }
+                Transformation bukkitTransform = matrixToBukkitTransformRelative(currentRelativeTransform,
+                        bone.getScale());
 
-                // --- Calcular la Transformación para Bukkit ---
-                // Extraer componentes de la matriz MUNDIAL
-                Vector3d worldPosDouble = currentWorldTransform.getTranslation(new Vector3d());
-                Quaterniond worldRotDouble = currentWorldTransform.getNormalizedRotation(new Quaterniond());
-                Vector3d worldScaleDouble = currentWorldTransform.getScale(new Vector3d());
-
-                // Convertir a float para Bukkit Transformation
-                Vector3f finalTranslation = new Vector3f((float) worldPosDouble.x, (float) worldPosDouble.y,
-                        (float) worldPosDouble.z);
-                Quaternionf finalRotation = new Quaternionf((float) worldRotDouble.x, (float) worldRotDouble.y,
-                        (float) worldRotDouble.z, (float) worldRotDouble.w);
-                Vector3f finalScale = new Vector3f((float) worldScaleDouble.x, (float) worldScaleDouble.y,
-                        (float) worldScaleDouble.z);
-
-                // Ajustar escala global del hueso (calculada por ModelProcessor)
-                finalScale.mul((float) bone.getScale()); // Aplicar escala calculada para ajustar tamaño
-
-                // *** AJUSTE IMPORTANTE: La transformación del ItemDisplay es RELATIVA a su
-                // ubicación de spawn ***
-                // Necesitamos calcular la traslación relativa a la baseLocation de la
-                // instancia.
-                Location baseLoc = instance.getBaseLocation();
-                Vector3f relativeTranslation = new Vector3f(finalTranslation)
-                        .sub((float) baseLoc.getX(), (float) baseLoc.getY(), (float) baseLoc.getZ());
-
-                finalRotation.rotateY((float) Math.PI);
-
-                Transformation transformation = new Transformation(
-                        relativeTranslation, // Usar traslación relativa
-                        finalRotation, // Rotación izquierda
-                        finalScale, // Escala
-                        new Quaternionf() // Rotación derecha (usualmente identidad)
-                );
-
-                if (ENABLE_DEBUG_LOGS) {
-                    VitalCore.Log.info("[DEBUG]   World Pos: " + vectorToString(worldPosDouble));
-                    VitalCore.Log.info("[DEBUG]   Base Loc: " + baseLoc.toVector());
-                    VitalCore.Log.info("[DEBUG]   Relative Translation for Bukkit: " + relativeTranslation);
-                    VitalCore.Log.info("[DEBUG]   Final Rotation for Bukkit (Quat): " + quatToString(finalRotation));
-                    VitalCore.Log.info("[DEBUG]   Final Scale for Bukkit (con ajuste): " + finalScale);
-                }
-
-                // --- Spawneo de la Entidad ItemDisplay ---
-                ItemDisplay display = null;
                 try {
-                    // Spawnea la entidad EN la baseLocation, la transformación la moverá
-                    display = (ItemDisplay) instance.getBaseLocation().getWorld()
-                            .spawnEntity(instance.getBaseLocation(), EntityType.ITEM_DISPLAY);
+                    ItemDisplay display = baseEntity.getWorld().spawn(baseEntity.getLocation(), ItemDisplay.class,
+                            d -> {
+                                d.setItemStack(displayItem);
+                                d.setTransformation(bukkitTransform);
+                                d.setBillboard(Billboard.FIXED);
+                                d.setInterpolationDuration(1);
+                                d.setInterpolationDelay(-1);
+                            });
 
                     if (display != null && display.isValid()) {
-                        display.setItemStack(displayItem);
-                        display.setBillboard(Display.Billboard.FIXED); // Para que rote con el modelo
-                        display.setInterpolationDuration(1); // Interpolación suave (1 tick)
-                        display.setInterpolationDelay(-1); // Iniciar interpolación inmediatamente
-                        // Guardar UUID de la instancia en metadata para identificación posterior
-                        display.setMetadata(METADATA_KEY,
-                                new FixedMetadataValue(VitalCore.getPlugin(), instance.getInstanceUuid().toString()));
-
-                        // Aplicar la transformación calculada
-                        display.setTransformation(transformation);
-
-                        // Añadir al mapa de la instancia usando la clave única
                         instance.addBoneEntity(bonePartKey, display);
-                        if (ENABLE_DEBUG_LOGS) {
-                            VitalCore.Log.info(
-                                    "[DEBUG]   SUCCESS: Spawneado y transformado ItemDisplay para " + bonePartKey);
+                        boolean added = baseEntity.addPassenger(display);
+                        if (added) {
+                            if (ENABLE_DEBUG_LOGS)
+                                VitalCore.Log.info("[DEBUG Spawn Attached]   SUCCESS: Spawned and added PASSENGER "
+                                        + bonePartKey + " to base " + baseEntity.getEntityId());
+                        } else {
+                            VitalCore.Log.warning("[EntityModelHandler] Could not add ItemDisplay "
+                                    + display.getUniqueId() + " as passenger to base " + baseEntity.getEntityId()
+                                    + " for " + bonePartKey);
+                            if (display.isValid())
+                                display.remove();
                         }
                     } else {
-                        VitalCore.Log.warning(
-                                "[EntityModelHandler] Spawn de ItemDisplay falló o inválido para hueso " + bonePartKey);
+                        VitalCore.Log
+                                .warning("[EntityModelHandler] Spawn of ItemDisplay failed or was invalid for bone "
+                                        + bonePartKey);
                     }
-
                 } catch (Exception e) {
                     VitalCore.Log.log(Level.SEVERE,
-                            "[EntityModelHandler] FAILED al spawnear o transformar ItemDisplay para hueso "
-                                    + bonePartKey + "!",
-                            e);
-                    // Considerar si continuar con los hijos o abortar
+                            "[EntityModelHandler] Excepción al spawnear/adjuntar ItemDisplay para " + bonePartKey, e);
                 }
-                modelIndex++;
-            } // Fin del bucle for (JavaItemModel)
-        } else {
-            if (ENABLE_DEBUG_LOGS) {
-                VitalCore.Log.info("[DEBUG]   Saltando spawn de ItemDisplay para hueso '" + bone.getName()
-                        + "' (no tiene JavaItemModels). Calculando transform para hijos.");
+                modelPartIndex++;
             }
+        } else {
+            if (ENABLE_DEBUG_LOGS)
+                VitalCore.Log.info("[DEBUG Spawn Attached]   Skipping ItemDisplay spawn for bone '" + bone.getName()
+                        + "' (no JavaItemModels).");
         }
 
-        // --- 4. Procesar Hijos Recursivamente ---
         if (bone.getChildren() != null) {
             for (ProcessedBone childBone : bone.getChildren()) {
-                spawnBoneRecursive(instance, childBone, currentWorldTransform); // Pasar la matriz MUNDIAL actual
+                spawnBoneRecursiveAttached(instance, childBone, currentRelativeTransform, baseEntity);
             }
         }
-        if (ENABLE_DEBUG_LOGS && (bone.getChildren() == null || bone.getChildren().isEmpty())) {
-            VitalCore.Log.info("[DEBUG]   No hay hijos para hueso " + bone.getName());
-        }
-        if (ENABLE_DEBUG_LOGS) {
-            VitalCore.Log.info("-----------------------------------------");
-        }
     }
 
-    /**
-     * Método de Tick (a implementar). Aquí iría la lógica para actualizar
-     * las transformaciones de los ItemDisplay basados en las animaciones.
-     *
-     * @param instance La instancia del modelo a actualizar.
-     */
     @Override
     public void tick(ModelInstance instance) {
-        // TODO: Implementar lógica de animación
-        // 1. Obtener la animación activa y el tiempo actual.
-        // 2. Calcular la transformación interpolada para cada hueso usando
-        // ProcessedBone y datos de animación.
-        // 3. Obtener el ItemDisplay correspondiente del mapa
-        // instance.getBoneEntities().
-        // 4. Calcular la nueva Transformation de Bukkit (relativa a la baseLocation).
-        // 5. Aplicar la nueva transformación al ItemDisplay:
-        // display.setTransformation(newTransformation);
-        // (Considerar setInterpolationDuration/Delay para suavizar).
+        if (instance == null || instance.getModel() == null)
+            return;
+
+        Optional<Entity> baseEntityOpt = instance.getBaseEntity();
+        if (baseEntityOpt.isEmpty() || !baseEntityOpt.get().isValid()) {
+            // Base entity is gone or invalid, ModelEngineManager's tick will handle
+            // destroying the instance
+            return;
+        }
+        // Entity baseEntity = baseEntityOpt.get();
+
+        AnimationController animController = instance.getAnimationController();
+        if (animController == null)
+            return;
+
+        // 1. Tick the animation controller
+        animController.tickController(DELTA_TIME);
+
+        // 2. Get the calculated local animated transforms for each bone
+        Map<String, AnimationController.BoneTransform> animatedLocalTransforms = animController
+                .getCurrentBoneTransforms();
+
+        // 3. Initial parent transform (offset for base entity height)
+        Matrix4f rootParentTransform = new Matrix4f().translate(0.0f, (float) -baseEntityOpt.get().getHeight(), 0.0f);
+
+        // 4. Recursively update bone visual transforms
+        for (ProcessedBone rootBone : instance.getModel().getBones().values()) {
+            if (rootBone.getParent() == null) { // Start with root bones
+                updateBoneVisualRecursive(instance, rootBone, rootParentTransform, animatedLocalTransforms);
+            }
+        }
     }
 
-    /**
-     * Destruye todas las entidades ItemDisplay asociadas a una instancia del
-     * modelo.
-     *
-     * @param instance La instancia del modelo a destruir.
-     */
     @Override
     public void destroy(ModelInstance instance) {
         if (instance == null)
             return;
 
-        Map<String, ItemDisplay> boneEntities = instance.getBoneEntities(); // Obtiene vista no modificable
+        if (instance.getAnimationController() != null) {
+            instance.getAnimationController().stopAllAnimations(true);
+        }
 
-        // Crear una copia para iterar de forma segura mientras se modifica el mapa
-        // original (indirectamente)
-        List<ItemDisplay> displaysToRemove = new ArrayList<>(boneEntities.values());
-
-        if (!displaysToRemove.isEmpty()) {
-            if (ENABLE_DEBUG_LOGS) {
-                VitalCore.Log.info("[DEBUG] Destruyendo " + displaysToRemove.size() + " entidades para instancia "
-                        + instance.getInstanceUuid());
-            }
-            for (ItemDisplay display : displaysToRemove) {
-                if (display != null && display.isValid()) {
-                    // Limpiar metadata antes de remover
-                    if (display.hasMetadata(METADATA_KEY)) {
-                        display.removeMetadata(METADATA_KEY, VitalCore.getPlugin());
+        // Clean up base entity IF created by this handler
+        instance.getBaseEntity().ifPresent(baseEntity -> {
+            if (baseEntity.isValid()) {
+                boolean createdByHandler = false;
+                for (MetadataValue metaValue : baseEntity.getMetadata(BASE_METADATA_KEY)) {
+                    if (metaValue.getOwningPlugin() == VitalCore.getPlugin()
+                            && metaValue.asString().endsWith(METADATA_VALUE_HANDLER_CREATED)) {
+                        createdByHandler = true;
+                        break;
                     }
-                    display.remove(); // Remover la entidad del mundo
-                } else if (display != null) {
-                    // Log si intentamos remover una entidad ya inválida
-                    VitalCore.Log.warning("[DEBUG] Intentando destruir entidad ya inválida: " + display.getUniqueId());
+                }
+
+                if (createdByHandler) {
+                    if (ENABLE_DEBUG_LOGS)
+                        VitalCore.Log.info("[EntityModelHandler DEBUG] Destroying handler-created base entity: "
+                                + baseEntity.getUniqueId());
+                    // IMPORTANT: Remove passengers BEFORE removing the base entity
+                    baseEntity.getPassengers().forEach(p -> {
+                        if (p != null && p.isValid())
+                            p.remove();
+                    });
+                    baseEntity.remove();
+                } else {
+                    if (ENABLE_DEBUG_LOGS)
+                        VitalCore.Log.info("[EntityModelHandler DEBUG] Base entity " + baseEntity.getUniqueId()
+                                + " was not created by this handler. Not removing it.");
+                    // Even if not removing base, ensure passengers (our displays) are gone
+                    // ModelInstance.remove() should have been called by ModelEngineManager,
+                    // but double-checking passengers is safer.
+                    baseEntity.getPassengers().forEach(p -> {
+                        // Check if passenger is one of our ItemDisplays
+                        if (p instanceof ItemDisplay && instance.getBoneEntities().containsValue(p)) {
+                            if (p.isValid())
+                                p.remove();
+                        }
+                    });
                 }
             }
-        } else {
-            if (ENABLE_DEBUG_LOGS) {
-                VitalCore.Log.info("[DEBUG] Instancia " + instance.getInstanceUuid()
-                        + " no tenía entidades de hueso para destruir.");
+        });
+        if (ENABLE_DEBUG_LOGS)
+            VitalCore.Log.info("[EntityModelHandler DEBUG] Destroy called for instance: " + instance.getInstanceUuid());
+        // Note: ModelInstance.remove() which clears boneEntities map is called by
+        // ModelEngineManager
+    }
+
+    private void updateBoneVisualRecursive(ModelInstance instance, ProcessedBone bone, Matrix4f parentAbsoluteMatrix,
+            Map<String, AnimationController.BoneTransform> animatedLocalTransforms) {
+        if (bone == null)
+            return;
+
+        // Get the bone's initial pivot (scaled) and bind pose rotation
+        Vector3f scaledInitialPivot = new Vector3f(bone.getInitialPivot()).div(16.0f);
+        // Quaternionf initialLocalRotation = MathUtils.fromEulerZYX(new
+        // org.joml.Vector3d(bone.getInitialRotation())).normalize(); // ZYX order,
+        // degrees
+
+        // Get the animated local transform (P, R, S) for this bone
+        // This transform is assumed to be the bone's final local pose relative to its
+        // pivot
+        AnimationController.BoneTransform animTransform = animatedLocalTransforms.get(bone.getUuid());
+        if (animTransform == null) { // Should not happen if controller initializes all bones
+            animTransform = new AnimationController.BoneTransform(); // Default to identity
+            if (ENABLE_DEBUG_LOGS)
+                VitalCore.Log.warning("[EntityModelHandler DEBUG] No animTransform for bone " + bone.getUuid()
+                        + " in tick. Using identity.");
+        }
+
+        // Construct the bone's local matrix using its initial pivot and animated P, R,
+        // S
+        // The animTransform.rotation is the final orientation of the bone in its local
+        // space.
+        // The animTransform.position is the translation from its pivot.
+        // The animTransform.scale is the scale around its pivot.
+        Matrix4f boneCurrentLocalMatrix = new Matrix4f()
+                .translate(scaledInitialPivot) // 1. Move to the bone's pivot point in parent space
+                .rotate(animTransform.rotation) // 2. Apply animated rotation AT THE PIVOT
+                .scale(animTransform.scale) // 3. Apply animated scale AT THE PIVOT
+                .translate(animTransform.position); // 4. Apply animated translation (relative to the pivot)
+
+        // Calculate the bone's new absolute matrix (relative to the base entity)
+        Matrix4f boneCurrentAbsoluteMatrix = new Matrix4f(parentAbsoluteMatrix).mul(boneCurrentLocalMatrix);
+
+        // Update all ItemDisplay parts associated with this bone
+        if (bone.getItemModels() != null && !bone.getItemModels().isEmpty()) {
+            for (JavaItemModel javaModel : bone.getItemModels()) {
+                String bonePartDisplayKey = bone.getUuid() + ":" + javaModel.getName();
+                ItemDisplay displayEntity = instance.getBoneEntities().get(bonePartDisplayKey);
+
+                if (displayEntity != null && displayEntity.isValid()) {
+                    // Apply the Y-flip for Blockbench compatibility before converting to Bukkit
+                    // transform
+                    Matrix4d finalTransformForDisplay = new Matrix4d(boneCurrentAbsoluteMatrix).mul(Y_FLIP_MATRIX);
+                    Transformation newBukkitTransform = matrixToBukkitTransformRelative(finalTransformForDisplay,
+                            bone.getScale());
+
+                    displayEntity.setTransformation(newBukkitTransform);
+                    // Interpolation duration is set at spawn, but can be re-set if needed:
+                    // displayEntity.setInterpolationDuration(1);
+                }
             }
         }
 
-        // Limpiar el mapa interno de la instancia después de remover las entidades
-        if (instance instanceof DefaultModelInstance) {
-            ((DefaultModelInstance) instance).clearBoneEntities();
-            if (ENABLE_DEBUG_LOGS) {
-                VitalCore.Log.info(
-                        "[DEBUG] Mapa de entidades de hueso limpiado para instancia " + instance.getInstanceUuid());
+        // Recursively update children
+        if (bone.getChildren() != null) {
+            for (ProcessedBone childBone : bone.getChildren()) {
+                updateBoneVisualRecursive(instance, childBone, boneCurrentAbsoluteMatrix, animatedLocalTransforms);
             }
         }
     }
 
-    // --- Métodos Helper para Logging (JOML double) ---
-    private String matrixToString(Matrix4d m) { // Cambiado a Matrix4d
-        if (!ENABLE_DEBUG_LOGS || m == null)
-            return "";
-        StringBuilder sb = new StringBuilder();
-        double[] v = new double[16];
-        m.get(v); // Obtener como double
-        sb.append(String.format(" [%.3f, %.3f, %.3f, %.3f]\n", v[0], v[4], v[8], v[12]));
-        sb.append(String.format(" [%.3f, %.3f, %.3f, %.3f]\n", v[1], v[5], v[9], v[13]));
-        sb.append(String.format(" [%.3f, %.3f, %.3f, %.3f]\n", v[2], v[6], v[10], v[14]));
-        sb.append(String.format(" [%.3f, %.3f, %.3f, %.3f]", v[3], v[7], v[11], v[15]));
-        return sb.toString();
-    }
+    /**
+     * Convierte una Matrix4d (JOML, transformación RELATIVA a la base) a
+     * Transformation (Bukkit)
+     */
+    private Transformation matrixToBukkitTransformRelative(Matrix4d relativeMatrix, float boneScaleFactor) {
+        Vector3d translationDouble = relativeMatrix.getTranslation(new Vector3d());
+        Quaterniond rotationDouble = relativeMatrix.getNormalizedRotation(new Quaterniond());
+        Vector3d scaleDouble = relativeMatrix.getScale(new Vector3d());
 
-    private String vectorToString(Vector3d v) { // Cambiado a Vector3d
-        if (!ENABLE_DEBUG_LOGS || v == null)
-            return "";
-        return String.format("(%.3f, %.3f, %.3f)", v.x, v.y, v.z);
-    }
+        Vector3f translation = new Vector3f((float) translationDouble.x, (float) translationDouble.y,
+                (float) translationDouble.z);
+        Quaternionf rotation = new Quaternionf((float) rotationDouble.x, (float) rotationDouble.y,
+                (float) rotationDouble.z, (float) rotationDouble.w);
+        Vector3f scale = new Vector3f((float) scaleDouble.x, (float) scaleDouble.y, (float) scaleDouble.z);
 
-    private String vectorToString(Vector3f v) { // Sobrecarga para Vector3f
-        if (!ENABLE_DEBUG_LOGS || v == null)
-            return "";
-        return String.format("(%.3f, %.3f, %.3f)", v.x, v.y, v.z);
-    }
+        scale.mul(boneScaleFactor);
 
-    private String quatToString(Quaterniond q) { // Cambiado a Quaterniond
-        if (!ENABLE_DEBUG_LOGS || q == null)
-            return "";
-        return String.format("(x:%.3f, y:%.3f, z:%.3f, w:%.3f)", q.x, q.y, q.z, q.w);
-    }
-
-    private String quatToString(Quaternionf q) { // Sobrecarga para Quaternionf
-        if (!ENABLE_DEBUG_LOGS || q == null)
-            return "";
-        return String.format("(x:%.3f, y:%.3f, z:%.3f, w:%.3f)", q.x, q.y, q.z, q.w);
+        return new Transformation(translation, rotation, scale, new Quaternionf());
     }
 }

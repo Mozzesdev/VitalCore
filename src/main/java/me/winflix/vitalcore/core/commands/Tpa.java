@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import me.winflix.vitalcore.core.managers.TeleportManager;
 import me.winflix.vitalcore.general.commands.BaseCommand;
+import me.winflix.vitalcore.general.utils.Utils;
 
 public class Tpa extends BaseCommand {
 
@@ -17,12 +18,12 @@ public class Tpa extends BaseCommand {
 
     @Override
     public String getVariants() {
-        return null;
+        return "teleport";
     }
 
     @Override
     public String getDescription() {
-        return "Teleport to a player";
+        return "Solicita teletransportarse hacia otro jugador";
     }
 
     @Override
@@ -32,7 +33,7 @@ public class Tpa extends BaseCommand {
 
     @Override
     public String getSyntax() {
-        return "/tpa <player>";
+        return "/tpa <jugador>";
     }
 
     @Override
@@ -48,14 +49,14 @@ public class Tpa extends BaseCommand {
     public void perform(Player player, String[] args) {
         // Verificar que se especifique un jugador destino
         if (args.length == 0) {
-            player.sendMessage("§cUso correcto: " + getSyntax());
+            Utils.errorMessage(player, "Uso correcto: " + getSyntax());
             return;
         }
 
         // Obtener al jugador destino
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null || !target.isOnline()) {
-            player.sendMessage("§cJugador no encontrado o desconectado.");
+            Utils.errorMessage(player, "Jugador no encontrado o desconectado.");
             return;
         }
 

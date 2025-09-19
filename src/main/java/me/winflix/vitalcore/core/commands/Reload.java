@@ -29,7 +29,7 @@ public class Reload extends SubCommand {
 
     @Override
     public String getDescription(Player p) {
-        return "This command save the home of your tribe.";
+        return "Recarga todas las configuraciones del plugin";
     }
 
     @Override

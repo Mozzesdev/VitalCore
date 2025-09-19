@@ -2,8 +2,9 @@ name: VitalCore
 main: me.winflix.vitalcore.VitalCore
 version: ${project.version}
 api-version: 1.21
-authors: [ WinFlix ]
+authors: [WinFlix]
 description: Core of OverWild
+depend: [RSManager]
 commands:
   tribe:
     description: Main command of the tribes
@@ -42,6 +43,21 @@ commands:
     usage: /<command>
     aliases:
       - teleportdeny
+  tpahere:
+    description: Request that another player teleports to you
+    usage: /<command> <player>
+    aliases:
+      - tphere
+  tptoggle:
+    description: Toggle receiving teleport requests
+    usage: /<command>
+    aliases:
+      - tptog
+  back:
+    description: Return to your previous location
+    usage: /<command>
+    aliases:
+      - return
   spawn:
     description: Main command of the VitalCore
     usage: /<command>
@@ -62,3 +78,83 @@ commands:
     usage: /<command>
     aliases:
       - adds
+  heal:
+    description: Restaura la vida y elimina efectos negativos
+    usage: /heal
+    aliases:
+      - curar
+  feed:
+    description: Rellena la barra de hambre y saturación
+    usage: /feed
+    aliases:
+      - comer
+  god:
+    description: Activa o desactiva el modo invulnerable
+    usage: /god
+    aliases:
+      - invulnerable
+  fly:
+    description: Activa o desactiva el vuelo
+    usage: /fly
+    aliases:
+      - volar
+  afk:
+    description: Activa o desactiva el modo AFK con motivo opcional
+    usage: /afk [motivo]
+    aliases:
+      - away
+  afklist:
+    description: Muestra el estado AFK e inactividad de todos los jugadores
+    usage: /afklist
+    aliases:
+      - listafk
+  repair:
+    description: Repara items consumiendo experiencia (requiere permisos específicos)
+    usage: /repair [hand | all]
+    aliases:
+      - fix
+      - reparar
+  enderchest:
+    description: Abre tu ender chest desde cualquier lugar
+    usage: /enderchest
+    aliases:
+      - ec
+      - echest
+  workbench:
+    description: Abre una mesa de crafteo virtual
+    usage: /workbench
+    aliases:
+      - wb
+      - craft
+      - crafting
+  anvil:
+    description: Abre un yunque virtual
+    usage: /anvil
+    aliases:
+      - yunque
+  warp:
+    description: Sistema de teletransporte con warps
+    usage: /warp [nombre|subcomando]
+    aliases:
+      - warps
+      - teleport
+
+permissions:
+  vitalcore.warp.use:
+    description: Permite usar warps básicos
+    default: true
+  vitalcore.warp.admin:
+    description: Acceso completo al sistema de warps (bypass de todos los permisos)
+    default: op
+  vitalcore.warp.set:
+    description: Permite crear nuevos warps
+    default: op
+  vitalcore.warp.delete:
+    description: Permite eliminar warps
+    default: op
+  vitalcore.warp.bypass.cooldown:
+    description: Sin cooldowns en warps
+    default: op
+  vitalcore.warp.bypass.warmup:
+    description: Teletransporte inmediato sin tiempo de espera
+    default: op

@@ -48,7 +48,7 @@ public class Spawn extends BaseCommand {
     public void perform(Player player, String[] args) {
         // Modo administrador: teletransportar a otros jugadores
         if(args.length > 0) {
-            if(!player.hasPermission("vitalcore.spawn.others") || !player.isOp()) {
+            if(!player.hasPermission("vitalcore.spawn.others") && !player.isOp()) {
                 Utils.errorMessage(player, "No puedes teletransportar a otros jugadores.");
                 return;
             }

@@ -47,6 +47,7 @@ public class Tribes extends Manager {
         CommandManager tribeCommandManager = new CommandManager(plugin, tribeCommands, new BaseTribeCommand());
         assert tribeCommand != null;
         tribeCommand.setExecutor(tribeCommandManager);
+        tribeCommand.setTabCompleter(tribeCommandManager);
     }
 
     public void registerCommands() {

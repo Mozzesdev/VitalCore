@@ -1,8 +1,13 @@
 package me.winflix.vitalcore.addons;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
+import org.bukkit.plugin.RegisteredServiceProvider;
+
+import me.winflix.rsmanager.api.ResourcePackAPI;
+import me.winflix.rsmanager.api.exceptions.NamespaceAlreadyRegisteredException;
+import me.winflix.rsmanager.api.exceptions.ResourcePackApiException;
 import me.winflix.vitalcore.VitalCore;
 import me.winflix.vitalcore.general.commands.CommandManager;
 import me.winflix.vitalcore.general.commands.SubCommand;
@@ -11,16 +16,14 @@ import me.winflix.vitalcore.addons.commands.ModelList;
 import me.winflix.vitalcore.addons.commands.Spawn;
 import me.winflix.vitalcore.addons.commands.Reload;
 import me.winflix.vitalcore.addons.commands.Remove;
-import me.winflix.vitalcore.addons.events.ResourcePackListener;
-import me.winflix.vitalcore.addons.managers.ModelEngineManager;
-import me.winflix.vitalcore.addons.managers.ResourcePackManager;
-import me.winflix.vitalcore.addons.server.HttpServerManager;
+import me.winflix.vitalcore.addons.model.runtime.ModelEngineManager;
 
 public class Addons extends Manager {
     private final ArrayList<SubCommand> addCommands = new ArrayList<>();
     private ModelEngineManager modelEngineManager;
-    private ResourcePackManager resourcePackManager;
-    private HttpServerManager httpServerManager;
+    private ResourcePackAPI rsManagerAPI = null;
+    private boolean apiAvailable = false;
+    public static final String ADDONS_NAMESPACE = "vc_addons";
 
     public Addons(VitalCore plugin) {
         super(plugin);
@@ -28,18 +31,36 @@ public class Addons extends Manager {
 
     @Override
     public Addons initialize() {
-        modelEngineManager = new ModelEngineManager(plugin.getDataFolder());
-        try {
-            resourcePackManager = new ResourcePackManager(modelEngineManager);
-            resourcePackManager.generateResourcePack(true);
-        } catch (IOException e) {
-            e.printStackTrace();
+        RegisteredServiceProvider<ResourcePackAPI> provider = plugin.getServer().getServicesManager()
+                .getRegistration(ResourcePackAPI.class);
+        if (provider != null) {
+            this.rsManagerAPI = provider.getProvider();
+            this.apiAvailable = true;
+
+            try {
+                this.rsManagerAPI.registerNamespace(plugin, ADDONS_NAMESPACE);
+            } catch (NamespaceAlreadyRegisteredException e) {
+                VitalCore.Log.warning("[Addons] El namespace '" + ADDONS_NAMESPACE
+                        + "' ya estaba registrado (esto puede ser normal).");
+            } catch (IllegalArgumentException | ResourcePackApiException e) {
+                VitalCore.Log.log(Level.SEVERE,
+                        "[Addons] Error al registrar el namespace '" + ADDONS_NAMESPACE + "': " + e.getMessage(), e);
+                this.apiAvailable = false;
+            }
+
+        } else {
+            VitalCore.Log.severe(
+                    "[Addons] No se pudo encontrar la API de CentralResourcePack. Funcionalidades de Resource Pack desactivadas.");
+            VitalCore.Log.severe("[Addons] Asegúrate de que CentralResourcePack esté instalado y habilitado.");
+            this.apiAvailable = false;
         }
+
+        modelEngineManager = new ModelEngineManager(plugin,
+                this.rsManagerAPI, ADDONS_NAMESPACE);
+
         setupCommands();
         setupEvents();
-        httpServerManager = new HttpServerManager(plugin,
-                this.resourcePackManager);
-        httpServerManager.startServer();
+
         return this;
     }
 
@@ -50,7 +71,6 @@ public class Addons extends Manager {
     }
 
     public void setupEvents() {
-        plugin.getServer().getPluginManager().registerEvents(new ResourcePackListener(resourcePackManager), plugin);
     }
 
     public void registerCommands() {
@@ -64,16 +84,22 @@ public class Addons extends Manager {
         return modelEngineManager;
     }
 
-    public ResourcePackManager getResourcePackManager() {
-        return resourcePackManager;
+    public ResourcePackAPI getRSManagerApi() {
+        return rsManagerAPI;
+    }
+
+    // Flag para saber si la API está disponible
+    public boolean isApiAvailable() {
+        return apiAvailable;
     }
 
     @Override
     public void onDisable() {
-        if (httpServerManager != null)
-            httpServerManager.stopServer();
         if (modelEngineManager != null)
             modelEngineManager.shutdown();
+
+        this.rsManagerAPI = null;
+        this.apiAvailable = false;
     }
 
 }

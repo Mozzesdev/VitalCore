@@ -15,6 +15,7 @@ import me.winflix.vitalcore.general.models.PlayerMenuUtility;
 import me.winflix.vitalcore.general.utils.Utils;
 import me.winflix.vitalcore.skins.Skins;
 import me.winflix.vitalcore.tribes.Tribes;
+import me.winflix.vitalcore.warps.Warps;
 
 public class VitalCore extends JavaPlugin {
     public static final Logger Log = Logger.getLogger("VitalCore");
@@ -31,6 +32,7 @@ public class VitalCore extends JavaPlugin {
         new Core(this).initialize();
         new Skins(this).initialize();
         new Tribes(this).initialize();
+        new Warps(this).initialize();
         addons = new Addons(this).initialize();
 
         registerGeneralEvents();

@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 
 import me.winflix.vitalcore.VitalCore;
-import me.winflix.vitalcore.addons.managers.ModelEngineManager;
+import me.winflix.vitalcore.addons.model.runtime.ModelEngineManager;
 import me.winflix.vitalcore.general.commands.SubCommand;
 import me.winflix.vitalcore.general.utils.Utils;
 
